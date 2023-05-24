@@ -8,9 +8,17 @@ This is an attempt to create a budgeting assistant. This will be using LLMs to p
 - Create a dashboard for me to check the data
 - Provide tips on how I could save more money or achieve my goals
 
+# Running as locally
+
+### For first set up or updates in the containeer
+- Run:
+    - docker-compose up -d
+
+
 # Tech stack
 
 - **Frontend** : Discord
 - **Database**: ? probably mySQL
 - **LLM**: GPT 3.5 (or other OpenAI model..)
 - **Prompting**: Guardrails
+
