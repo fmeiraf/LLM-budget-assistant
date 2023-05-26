@@ -18,7 +18,7 @@ This is an attempt to create a budgeting assistant. This will be using LLMs to p
 # Tech stack
 
 - **Frontend** : Discord
-- **Database**: ? probably mySQL
+- **Database**: PostgreSQL
 - **LLM**: GPT 3.5 (or other OpenAI model..)
-- **Prompting**: Guardrails
+- **Prompting management**: Guardrails
 
