@@ -21,8 +21,6 @@ def parse_transactions(transaction_string: str):
 
     max_tokens_calculated = 4096 - (2 * len(enc.encode(formatted_prompt)))
 
-    print(max_tokens_calculated)
-
     raw_llm_response, validated_response = guard(
         openai.Completion.create,
         prompt_params={"transaction_string": transaction_string},
