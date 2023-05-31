@@ -2,7 +2,15 @@ import discord
 import os
 import dotenv
 
+# from interactions import Client, Intents
+# from interactions.ext import prefixed_commands
+import interactions
+
+
 dotenv.load_dotenv()
+BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+GUILD_ID = int(os.getenv("DISCORD_GUILD_ID"))
+CMD_PREFIX = ""
 
 
 class MyClient(discord.Client):
@@ -10,17 +18,31 @@ class MyClient(discord.Client):
         print(f"Logged in as {self.user} (ID: {self.user.id})")
         print("------")
 
+    def is_bot_own_message(self, message):
+        # we do not want the bot to reply to itself
+        return message.author.id == self.user.id
+
     async def on_message(self, message):
         # we do not want the bot to reply to itself
-        if message.author.id == self.user.id:
+        if self.is_bot_own_message(message):
             return
 
-        if message.content.startswith("!hello"):
+        # health check
+        if message.content.startswith("hello"):
             await message.reply("Hello!", mention_author=True)
+
+        if message.content.startswith("insert"):
+            pass  # add to db
+
+        if message.content.startswith("delete"):
+            pass  # delete from db
+
+        if message.content.startswith("update"):
+            pass  # update db
 
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = MyClient(intents=intents)
-client.run(os.getenv("DISCORD_BOT_TOKEN"))
+client.run(BOT_TOKEN)

@@ -7,6 +7,7 @@ import tiktoken
 import os
 
 dotenv.load_dotenv()
+OPEN_API_KEY = os.getenv("OPENAI_API_KEY")
 
 model = "text-davinci-003"
 enc = tiktoken.encoding_for_model(model)
@@ -17,7 +18,7 @@ def parse_transactions(transaction_string: str):
     formatted_prompt = guard.prompt.format(
         **{"transaction_string": transaction_string}
     ).source
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_key = OPEN_API_KEY
 
     max_tokens_calculated = 4096 - (2 * len(enc.encode(formatted_prompt)))
 
