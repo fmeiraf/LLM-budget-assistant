@@ -4,6 +4,7 @@ This is an attempt to create a budgeting assistant. This will be using LLMs to p
 
 - Parse through credit card transations
 - Assign categories based on transactions names (try to make this as consistent and flexible as possible)
+- Split big inputs from customers that might exceed model max tokens limitations (i.e 4096 etc)
 - Write me weekly or ad-hoc summaries about my spending trends
 - Create a dashboard for me to check the data
 - Provide tips on how I could save more money or achieve my goals
