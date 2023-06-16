@@ -15,7 +15,8 @@ class BotClient(discord.Client):
 
     async def starter_message(self, message):
         starter_message = await message.channel.send(
-            content=f"Hi {message.author.mention}  😎 \n \n Let's start working! What would you like to do now? Chose between the options below: \n ",
+            content=f"Hi {message.author.mention}  😎 \n \n Let's start working! What would you like to do now? \
+            Chose between the options below: \n ",
             reference=message,
             view=StarterView(),
         )
@@ -41,19 +42,21 @@ class StarterView(
     discord.ui.View
 ):  # Create a class called MyView that subclasses discord.ui.View
     @discord.ui.button(
-        label="Add transactions",
+        label="Add new account",
         row=0,
         style=discord.ButtonStyle.primary,
-        emoji="💸",
+        emoji="💳",
     )
     async def first_button_callback(self, button, interaction):
-        await interaction.response.send_message("You pressed me!")
+        await interaction.response.send_message(""" Be creatiave 💳 !! \
+            \nReply to this message with the name you want for your new account (you can choose anything like credit card, cc 4545, debit, mastercard, etc)""")
+                                                 
 
     @discord.ui.button(
-        label="Update transactions", row=0, style=discord.ButtonStyle.secondary, emoji="🔄"
+        label="Add transactions", row=0, style=discord.ButtonStyle.secondary, emoji="💸"
     )
     async def second_button_callback(self, button, interaction):
-        await interaction.response.send_message("You pressed me!")
+        await interaction.response.send_message("""Sure!  💳  Grab the trasanction information from your account and send me a reply to this message (just copy and paste, easy like that)""")
 
 
 # bot = discord.Bot(intents=intents)
