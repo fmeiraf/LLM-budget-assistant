@@ -25,7 +25,7 @@ This bot has the database and pgadmin running on separate (but connected) contai
 
 # Tech stack
 
-- **Frontend** : Discord
+- **Frontend** : Discord/pycord
 - **Database**: PostgreSQL
 - **LLM**: GPT 3.5 (or other OpenAI model..)
 - **Prompting management**: [Guardrails-ai](https://shreyar.github.io/guardrails/)
