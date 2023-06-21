@@ -38,12 +38,12 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
         """First message sent when message content matches Cog trigger."""
         pass
 
+    @abc.abstractmethod
     async def message_reply(self, message):
         """Message when user replies to bot starter message"""
         pass
 
     @abc.abstractmethod
-    @commands.Cog.listener("on_message")
     async def message_router(self, message):
         """Routes message to appropriate function based on content."""
         pass
@@ -52,13 +52,13 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
         bot.add_cog(MessageInteraction(bot))
 
 
-class TestCog(MessageInteraction):
-    # def __init__(self, bot):
-    #     super().__init__(bot)
-
+class Greetings(MessageInteraction):
     async def starter_message(self, message):
         starter_message = await message.channel.send(
-            content="Hi there! I'm a test cog!", reference=message
+            content=f"Hi {message.author.mention}  😎 \n \n Let's start working! What would you like to do now?\
+            Chose between the options below: \n ",
+            reference=message,
+            view=GreetingsView(),
         )
         self.last_message_id = starter_message.id
 
@@ -67,66 +67,22 @@ class TestCog(MessageInteraction):
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
-        if message.content.lower() == "test":
+        if message.content.lower() == "hello":
             await self.starter_message(message)
         elif message.reference and self.last_message_id == message.reference.message_id:
             await self.message_reply(message)
 
     def setup(bot):
-        bot.add_cog(TestCog(bot))
+        bot.add_cog(Greetings(bot))
 
 
-class StarterMessage(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self._last_member = None
-
-    def is_bot_own_message(self, message):
-        # we do not want the bot to reply to itself
-        return message.author.id == self.user.id
-
-    async def create_message(self, message):
-        starter_message = await message.channel.send(
-            content=f"Hi {message.author.mention}  😎 \n \n Let's start working! What would you like to do now? \
-            Chose between the options below: \n ",
-            reference=message,
-            view=StarterView(),
-        )
-        self.starter_message_id = starter_message.id
-        return starter_message
-
-    @commands.Cog.listener("on_message")
-    async def hello(self, message):
-        if message.content.lower() == "hello":
-            # await message.channel.send("Hello there!")
-            await self.create_message(message)
-
-    def setup(bot):
-        """General cog loading."""
-        bot.add_cog(StarterMessage(bot))
-
-
-class RandomMessage(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    @commands.Cog.listener("on_message")
-    async def hello(self, message):
-        if message.content.lower() == "touche":
-            await message.channel.send("Ha!")
-
-    def setup(bot):
-        """General cog loading."""
-        bot.add_cog(RandomMessage(bot))
-
-
-cogs = [StarterMessage, RandomMessage, TestCog]
+cogs = [Greetings]
 
 
 ## __VIEWS__ ##
 
 
-class StarterView(
+class GreetingsView(
     discord.ui.View
 ):  # Create a class called MyView that subclasses discord.ui.View
     @discord.ui.button(
