@@ -26,12 +26,20 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
 
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot, is_auto_start=False):
         self.bot = bot
         self.last_message_id = None
+        self.is_auto_start = False  #
+
+        if self.is_auto_start:
+            self.auto_start()
 
     def is_bot_own_message(self, message):
         return message.author.id == self.bot.user.id
+
+    async def auto_start(self, interaction: discord.Interaction):
+        if self.auto_start:
+            await self.starter_message(interaction.message)
 
     @abc.abstractmethod
     async def starter_message(self, message):
@@ -58,7 +66,7 @@ class Greetings(MessageInteraction):
             content=f"Hi {message.author.mention}  😎 \n \n Let's start working! What would you like to do now?\
             Chose between the options below: \n ",
             reference=message,
-            view=GreetingsView(),
+            view=GreetingsView(bot=self.bot),
         )
         self.last_message_id = starter_message.id
 
@@ -67,16 +75,53 @@ class Greetings(MessageInteraction):
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
-        if message.content.lower() == "hello":
-            await self.starter_message(message)
-        elif message.reference and self.last_message_id == message.reference.message_id:
-            await self.message_reply(message)
+        if self.is_bot_own_message(message):
+            return
+        else:
+            if message.content.lower() == "hello":
+                await self.starter_message(message)
+            elif (
+                message.reference
+                and self.last_message_id == message.reference.message_id
+            ):
+                print(self.last_message_id, message.reference.message_id)
+                await self.message_reply(message)
 
     def setup(bot):
         bot.add_cog(Greetings(bot))
 
 
-cogs = [Greetings]
+class AddTransaction(MessageInteraction):
+    async def starter_message(self, message):
+        starter_message = await message.channel.send(
+            content=""" Be creatiave 💳 !! \
+            \nReply to this message with the name you want for your new account \
+            (you can choose anything like credit card, cc 4545, debit, mastercard, etc)""",
+            reference=message,
+        )
+        self.last_message_id = starter_message.id
+
+    async def message_reply(self, message):
+        await message.channel.send("You  have added  a new transaction $$ ")
+
+    @commands.Cog.listener("on_message")
+    async def message_router(self, message):
+        if self.is_bot_own_message(message):
+            return
+        else:
+            if message.content.lower() == "add transaction":
+                await self.starter_message(message)
+            elif (
+                message.reference
+                and self.last_message_id == message.reference.message_id
+            ):
+                await self.message_reply(message)
+
+    def setup(bot):
+        bot.add_cog(Greetings(bot))
+
+
+cogs = [Greetings, AddTransaction]
 
 
 ## __VIEWS__ ##
@@ -85,17 +130,21 @@ cogs = [Greetings]
 class GreetingsView(
     discord.ui.View
 ):  # Create a class called MyView that subclasses discord.ui.View
+    def __init__(self, bot):
+        super().__init__()
+        self.bot = bot
+
     @discord.ui.button(
         label="Add new account",
         row=0,
         style=discord.ButtonStyle.primary,
         emoji="💳",
     )
-    async def first_button_callback(self, button, interaction):
-        await interaction.response.send_message(
-            """ Be creatiave 💳 !! \
-            \nReply to this message with the name you want for your new account (you can choose anything like credit card, cc 4545, debit, mastercard, etc)"""
-        )
+    async def first_button_callback(self, interaction: discord.Interaction):
+        AddTransaction_instance = self.bot.get_cog("AddTransaction")
+
+        await AddTransaction_instance.starter_message(interaction.message)
+        await interaction.response.defer()  # this is to avoid interaction fail in the UI
 
     @discord.ui.button(
         label="Add transactions", row=0, style=discord.ButtonStyle.secondary, emoji="💸"
