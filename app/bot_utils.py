@@ -94,9 +94,9 @@ class Greetings(MessageInteraction):
 class AddTransaction(MessageInteraction):
     async def starter_message(self, message):
         starter_message = await message.channel.send(
-            content=""" Be creatiave 💳 !! \
-            \nReply to this message with the name you want for your new account \
-            (you can choose anything like credit card, cc 4545, debit, mastercard, etc)""",
+            content="Be creatiave 👨‍🎨 !! \n"
+            "Reply to this message with the name you want for your new account "
+            "(you can choose anything like credit card, cc 4545, debit, mastercard, etc)",
             reference=message,
         )
         self.last_message_id = starter_message.id
@@ -121,7 +121,36 @@ class AddTransaction(MessageInteraction):
         bot.add_cog(Greetings(bot))
 
 
-cogs = [Greetings, AddTransaction]
+class AddAccount(MessageInteraction):
+    async def starter_message(self, message):
+        starter_message = await message.channel.send(
+            content="Sure 💳! \nGrab the trasanction information from your account and send me a reply to this message"
+            " (just copy and paste, easy like that)",
+            reference=message,
+        )
+        self.last_message_id = starter_message.id
+
+    async def message_reply(self, message):
+        await message.channel.send("You  have added  a new account $$ ")
+
+    @commands.Cog.listener("on_message")
+    async def message_router(self, message):
+        if self.is_bot_own_message(message):
+            return
+        else:
+            if message.content.lower() == "add account":
+                await self.starter_message(message)
+            elif (
+                message.reference
+                and self.last_message_id == message.reference.message_id
+            ):
+                await self.message_reply(message)
+
+    def setup(bot):
+        bot.add_cog(Greetings(bot))
+
+
+cogs = [Greetings, AddTransaction, AddAccount]
 
 
 ## __VIEWS__ ##
@@ -140,8 +169,10 @@ class GreetingsView(
         style=discord.ButtonStyle.primary,
         emoji="💳",
     )
-    async def first_button_callback(self, interaction: discord.Interaction):
-        AddTransaction_instance = self.bot.get_cog("AddTransaction")
+    async def first_button_callback(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
+        AddTransaction_instance = self.bot.get_cog("AddAccount")
 
         await AddTransaction_instance.starter_message(interaction.message)
         await interaction.response.defer()  # this is to avoid interaction fail in the UI
@@ -149,7 +180,10 @@ class GreetingsView(
     @discord.ui.button(
         label="Add transactions", row=0, style=discord.ButtonStyle.secondary, emoji="💸"
     )
-    async def second_button_callback(self, button, interaction):
-        await interaction.response.send_message(
-            """Sure!  💳  Grab the trasanction information from your account and send me a reply to this message (just copy and paste, easy like that)"""
-        )
+    async def second_button_callback(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
+        AddTransaction_instance = self.bot.get_cog("AddTransaction")
+
+        await AddTransaction_instance.starter_message(interaction.message)
+        await interaction.response.defer()  # this is to avoid interaction fail in the UI

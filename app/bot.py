@@ -20,8 +20,7 @@ def start_bot(command_prefix="!", cogs_list: List[commands.Cog] = None):
     # INSTANTIATE BOT
     intents = discord.Intents.default()
     intents.message_content = True
-    # bot = discord.Bot(command_prefix="!", intents=intents) #this is for when instantiating as class was problmatic
-    bot = Bot(command_prefix="!", intents=intents)
+    bot = Bot(command_prefix=command_prefix, intents=intents)
 
     # ADD FUNCTIONALITY TO BOT USING COGS
     if cogs_list:
