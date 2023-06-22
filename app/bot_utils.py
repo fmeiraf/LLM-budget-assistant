@@ -26,7 +26,7 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
 
     """
 
-    def __init__(self, bot, is_auto_start=False):
+    def __init__(self, bot):
         self.bot = bot
         self.last_message_id = None
         self.is_auto_start = False  #
@@ -36,10 +36,6 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
 
     def is_bot_own_message(self, message):
         return message.author.id == self.bot.user.id
-
-    async def auto_start(self, interaction: discord.Interaction):
-        if self.auto_start:
-            await self.starter_message(interaction.message)
 
     @abc.abstractmethod
     async def starter_message(self, message):
