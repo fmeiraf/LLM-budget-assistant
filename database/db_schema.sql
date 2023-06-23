@@ -9,14 +9,14 @@ CREATE TABLE IF NOT EXISTS llm_finances.users (
     UNIQUE (email)
 );
 
--- Table: credit_cards
-CREATE TABLE IF NOT EXISTS llm_finances.credit_cards (
-    card_id SERIAL PRIMARY KEY,
+-- Table: accounts
+CREATE TABLE IF NOT EXISTS llm_finances.accounts (
+    account_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES llm_finances.users(user_id),
-    card_last_4_digits VARCHAR(4) NULL,
-    card_name VARCHAR(50) NOT NULL,
+    account_last_4_digits VARCHAR(4) NULL,
+    account_name VARCHAR(50) NOT NULL,
     
-    CONSTRAINT unique_card_name_per_user UNIQUE (user_id, card_name)
+    CONSTRAINT unique_account_name_per_user UNIQUE (user_id, account_name)
 );
 
 -- Table: categories
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS llm_finances.transactions (
     transaction_description VARCHAR(100) NOT NULL,
     credit DECIMAL(10, 2),
     debit DECIMAL(10, 2),
-    card_id INT REFERENCES llm_finances.credit_cards(card_id),
+    account_id INT REFERENCES llm_finances.accounts(account_id),
     category_id INT REFERENCES llm_finances.categories(category_id),
     user_id INT REFERENCES llm_finances.users(user_id)
 );
