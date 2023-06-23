@@ -94,11 +94,14 @@ class Database:
         )
         self.Session = sessionmaker(bind=self.engine)
 
-    def get_all_users(self):
+    def get_user_id_by_email(self, email: str):
         session = self.Session()
-        users = session.query(User).all()
+        user = session.query(User).filter_by(email=email).first()
         session.close()
-        return users
+        if user:
+            return user.user_id
+        else:
+            return None
 
     def create_user(self, email: str, password: str):
         session = self.Session()
@@ -223,5 +226,17 @@ def populate_test_db():
     print("Test records have been inserted successfully.")
 
 
+def test_email_retriver():
+    db = Database(**db_config)
+    email = "test@example.com"
+    user_id = db.get_user_id_by_email(email)
+
+    if user_id:
+        print(f"User ID for {email} is {user_id}")
+    else:
+        print(f"No user found with email {email}")
+
+
 if __name__ == "__main__":
-    populate_test_db()
+    # populate_test_db()
+    test_email_retriver()
