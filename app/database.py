@@ -238,5 +238,5 @@ def test_email_retriver():
 
 
 if __name__ == "__main__":
-    # populate_test_db()
+    populate_test_db()
     test_email_retriver()

@@ -19,7 +19,7 @@ This bot has the database and pgadmin running on separate (but connected) contai
 
   - docker-compose up -d
 
-- If you need to clean up the volumes to reset database, run"
+- If you need to clean up the volumes to reset database, run:
   - docker volume rm llm-budget-assistant_postgres
   - docker volume rm llm-budget-assistant_pgadmin
 
