@@ -90,6 +90,37 @@ class Greetings(MessageInteraction):
         bot.add_cog(Greetings(bot))
 
 
+class Menu(MessageInteraction):
+    async def starter_message(self, message):
+        starter_message = await message.channel.send(
+            content=f"Hi {message.author.mention}  😎 \n \n Let's start working! What would you like to do now?\
+            Chose between the options below: \n ",
+            reference=message,
+            view=MenuView(bot=self.bot),
+        )
+        self.update_last_message_id(starter_message)
+
+    async def message_reply(self, message):
+        await message.channel.send("You replied to my message!")
+
+    @commands.Cog.listener("on_message")
+    async def message_router(self, message):
+        if self.is_bot_own_message(message):
+            return
+        else:
+            if message.content.lower() == "menu":
+                await self.starter_message(message)
+            elif (
+                message.reference
+                and self.last_message_id == message.reference.message_id
+            ):
+                print(self.last_message_id, message.reference.message_id)
+                await self.message_reply(message)
+
+    def setup(bot):
+        bot.add_cog(Menu(bot))
+
+
 class AddTransaction(MessageInteraction):
     async def starter_message(self, message):
         starter_message = await message.channel.send(
@@ -116,7 +147,7 @@ class AddTransaction(MessageInteraction):
                 await self.message_reply(message)
 
     def setup(bot):
-        bot.add_cog(Greetings(bot))
+        bot.add_cog(AddTransaction(bot))
 
 
 class AddAccount(MessageInteraction):
@@ -146,7 +177,7 @@ class AddAccount(MessageInteraction):
                 await self.message_reply(message)
 
     def setup(bot):
-        bot.add_cog(Greetings(bot))
+        bot.add_cog(AddAccount(bot))
 
 
 class LogIn(MessageInteraction):
@@ -175,16 +206,78 @@ class LogIn(MessageInteraction):
                 await self.message_reply(message)
 
     def setup(bot):
-        bot.add_cog(Greetings(bot))
+        bot.add_cog(LogIn(bot))
 
 
-cogs = [Greetings, AddTransaction, AddAccount, LogIn]
+class SignUp(MessageInteraction):
+    async def starter_message(self, message):
+        starter_message = await message.channel.send(
+            content="Ok ok let's get you up and running👋! \n Provide me with an e-mail so I can create you a profile.",
+            reference=message,
+        )
+
+        self.update_last_message_id(starter_message)
+
+    async def message_reply(self, message):
+        await message.channel.send("You  have added  a new account $$ ")
+
+    @commands.Cog.listener("on_message")
+    async def message_router(self, message):
+        if self.is_bot_own_message(message):
+            return
+        else:
+            if message.content.lower() == "sign up":
+                await self.starter_message(message)
+            elif (
+                message.reference
+                and self.last_message_id == message.reference.message_id
+            ):
+                await self.message_reply(message)
+
+    def setup(bot):
+        bot.add_cog(SignUp(bot))
+
+
+cogs = [Menu, Greetings, AddTransaction, AddAccount, LogIn, SignUp]
 
 
 ## __VIEWS__ ##
 
 
 class GreetingsView(
+    discord.ui.View
+):  # Create a class called MyView that subclasses discord.ui.View
+    def __init__(self, bot):
+        super().__init__()
+        self.bot = bot
+
+    @discord.ui.button(
+        label="Log In",
+        row=0,
+        style=discord.ButtonStyle.primary,
+        emoji="▶️",
+    )
+    async def first_button_callback(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
+        LogIn_instance = self.bot.get_cog("LogIn")
+
+        await LogIn_instance.starter_message(interaction.message)
+        await interaction.response.defer()  # this is to avoid interaction fail in the UI
+
+    @discord.ui.button(
+        label="Sign Up", row=0, style=discord.ButtonStyle.secondary, emoji="🔻"
+    )
+    async def second_button_callback(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
+        SignUp_instance = self.bot.get_cog("SignUp")
+
+        await SignUp_instance.starter_message(interaction.message)
+        await interaction.response.defer()  # this is to avoid interaction fail in the UI
+
+
+class MenuView(
     discord.ui.View
 ):  # Create a class called MyView that subclasses discord.ui.View
     def __init__(self, bot):
