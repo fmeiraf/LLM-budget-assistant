@@ -93,9 +93,8 @@ class Greetings(MessageInteraction):
 class AddTransaction(MessageInteraction):
     async def starter_message(self, message):
         starter_message = await message.channel.send(
-            content="Be creatiave 👨‍🎨 !! \n"
-            "Reply to this message with the name you want for your new account "
-            "(you can choose anything like credit card, cc 4545, debit, mastercard, etc)",
+            content="Sure 💳! \nGrab the trasanction information from your account and send me a reply to this message"
+            " (just copy and paste, easy like that)",
             reference=message,
         )
         self.update_last_message_id(starter_message)
@@ -123,8 +122,9 @@ class AddTransaction(MessageInteraction):
 class AddAccount(MessageInteraction):
     async def starter_message(self, message):
         starter_message = await message.channel.send(
-            content="Sure 💳! \nGrab the trasanction information from your account and send me a reply to this message"
-            " (just copy and paste, easy like that)",
+            content="Be creatiave 👨‍🎨 !! \n"
+            "Reply to this message with the name you want for your new account "
+            "(you can choose anything like credit card, cc 4545, debit, mastercard, etc)",
             reference=message,
         )
         self.update_last_message_id(starter_message)
