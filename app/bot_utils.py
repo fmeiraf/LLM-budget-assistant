@@ -37,6 +37,9 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
     def is_bot_own_message(self, message):
         return message.author.id == self.bot.user.id
 
+    def update_last_message_id(self, message):
+        self.last_message_id = message.id
+
     @abc.abstractmethod
     async def starter_message(self, message):
         """First message sent when message content matches Cog trigger."""
@@ -64,7 +67,7 @@ class Greetings(MessageInteraction):
             reference=message,
             view=GreetingsView(bot=self.bot),
         )
-        self.last_message_id = starter_message.id
+        self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
         await message.channel.send("You replied to my message!")
@@ -95,7 +98,7 @@ class AddTransaction(MessageInteraction):
             "(you can choose anything like credit card, cc 4545, debit, mastercard, etc)",
             reference=message,
         )
-        self.last_message_id = starter_message.id
+        self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
         await message.channel.send("You  have added  a new transaction $$ ")
@@ -124,7 +127,7 @@ class AddAccount(MessageInteraction):
             " (just copy and paste, easy like that)",
             reference=message,
         )
-        self.last_message_id = starter_message.id
+        self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
         await message.channel.send("You  have added  a new account $$ ")
@@ -146,7 +149,36 @@ class AddAccount(MessageInteraction):
         bot.add_cog(Greetings(bot))
 
 
-cogs = [Greetings, AddTransaction, AddAccount]
+class LogIn(MessageInteraction):
+    async def starter_message(self, message):
+        starter_message = await message.channel.send(
+            content="Hey there 👋! \n Please reply to my message with your e-mail so I can find your profile.",
+            reference=message,
+        )
+
+        self.update_last_message_id(starter_message)
+
+    async def message_reply(self, message):
+        await message.channel.send("You  have added  a new account $$ ")
+
+    @commands.Cog.listener("on_message")
+    async def message_router(self, message):
+        if self.is_bot_own_message(message):
+            return
+        else:
+            if message.content.lower() == "log in":
+                await self.starter_message(message)
+            elif (
+                message.reference
+                and self.last_message_id == message.reference.message_id
+            ):
+                await self.message_reply(message)
+
+    def setup(bot):
+        bot.add_cog(Greetings(bot))
+
+
+cogs = [Greetings, AddTransaction, AddAccount, LogIn]
 
 
 ## __VIEWS__ ##
