@@ -252,6 +252,13 @@ class SignUp(MessageInteraction):
 
         self.bot.store_user_id(user_id)
 
+        if user_id:
+            await message.channel.send(f"Your profile has been created!")
+        else:
+            await message.channel.send(
+                f"Sorry, I couldn't create your profile. Please try again later"
+            )
+
     async def followup_reply(self, message):
         return
 
