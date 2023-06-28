@@ -312,7 +312,7 @@ class GreetingsView(
         await interaction.response.defer()  # this is to avoid interaction fail in the UI
 
     @discord.ui.button(
-        label="Sign Up", row=0, style=discord.ButtonStyle.secondary, emoji="➕"
+        label="Sign Up", row=0, style=discord.ButtonStyle.green, emoji="➕"
     )
     async def second_button_callback(
         self, button: discord.ui.Button, interaction: discord.Interaction
