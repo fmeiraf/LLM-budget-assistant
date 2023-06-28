@@ -4,6 +4,7 @@ import os  # default module
 from dotenv import load_dotenv
 from typing import List
 from bot_utils import cogs
+from database import Database, db_config
 
 load_dotenv()  # load all the variables from the env file
 
@@ -11,9 +12,14 @@ load_dotenv()  # load all the variables from the env file
 class Bot(discord.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user_id = None
+        self.db_client = Database(**db_config)
 
     async def on_ready(self):
         print(f"{self.user} is ready and online!")
+
+    def store_user_id(self, user_id):
+        self.user_id = user_id
 
 
 def start_bot(command_prefix="!", cogs_list: List[commands.Cog] = None):
