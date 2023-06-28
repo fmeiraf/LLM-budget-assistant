@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import abc
 from dotenv import load_dotenv
+from database import Database
 
 load_dotenv()  # load all the variables from the env file
 
@@ -190,7 +191,16 @@ class LogIn(MessageInteraction):
         self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
-        await message.channel.send("You  have added  a new account $$ ")
+        print(message.content, type(message.content))
+        user_id = self.bot.db_client.get_user_id_by_email(message.content)
+
+        if user_id:
+            self.bot.store_user_id(user_id)
+            await message.channel.send(f"You are logged in now!")
+        else:
+            await message.channel.send(
+                f"Sorry, I couldn't find any profile with that e-mail"
+            )
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
