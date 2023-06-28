@@ -173,7 +173,23 @@ class AddAccount(MessageInteraction):
         self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
-        await message.channel.send("You  have added  a new account $$ ")
+        new_account = message.content
+
+        # checking if new account name already exists
+        if self.bot.db_client.get_account_id_by_name(
+            user_id=self.bot.user_id, account_name=new_account
+        ):
+            await message.channel.send(
+                f"Sorry, you already have a category with that name"
+            )
+            return
+        else:
+            self.bot.db_client.create_account(
+                user_id=self.bot.user_id, account_name=new_account
+            )
+            await message.channel.send("You  have added  a new account $$  ")
+
+            return
 
     async def followup_reply(self, message):
         return

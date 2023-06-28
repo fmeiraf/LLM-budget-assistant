@@ -111,8 +111,24 @@ class Database:
         session.close()
         return user_id
 
+    def get_account_id_by_name(self, user_id: int, account_name: str):
+        session = self.Session()
+        account = (
+            session.query(Account)
+            .filter_by(user_id=user_id, account_name=account_name)
+            .first()
+        )
+        session.close()
+        if account:
+            return account.account_id
+        else:
+            return None
+
     def create_account(
-        self, user_id: int, account_last_4_digits: str, account_name: str
+        self,
+        user_id: int,
+        account_name: str,
+        account_last_4_digits: str = "0000",
     ):
         if len(account_last_4_digits) != 4 or not account_last_4_digits.isdigit():
             raise ValueError(
