@@ -30,10 +30,7 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
     def __init__(self, bot):
         self.bot = bot
         self.last_message_id = None
-        self.is_auto_start = False  #
-
-        if self.is_auto_start:
-            self.auto_start()
+        self.followup_message_id = None
 
     def is_bot_own_message(self, message):
         return message.author.id == self.bot.user.id
@@ -49,6 +46,11 @@ class MessageInteraction(commands.Cog, metaclass=CustomMeta):
     @abc.abstractmethod
     async def message_reply(self, message):
         """Message when user replies to bot starter message"""
+        pass
+
+    @abc.abstractmethod
+    async def followup_reply(self, message):
+        """Message when user replies to bot first reply message"""
         pass
 
     @abc.abstractmethod
@@ -72,6 +74,9 @@ class Greetings(MessageInteraction):
 
     async def message_reply(self, message):
         await message.channel.send("You replied to my message!")
+
+    async def followup_reply(self, message):
+        return
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
@@ -104,6 +109,9 @@ class Menu(MessageInteraction):
     async def message_reply(self, message):
         await message.channel.send("You replied to my message!")
 
+    async def followup_reply(self, message):
+        return
+
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
         if self.is_bot_own_message(message):
@@ -133,6 +141,9 @@ class AddTransaction(MessageInteraction):
 
     async def message_reply(self, message):
         await message.channel.send("You  have added  a new transaction $$ ")
+
+    async def followup_reply(self, message):
+        return
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
@@ -164,6 +175,9 @@ class AddAccount(MessageInteraction):
     async def message_reply(self, message):
         await message.channel.send("You  have added  a new account $$ ")
 
+    async def followup_reply(self, message):
+        return
+
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
         if self.is_bot_own_message(message):
@@ -191,7 +205,6 @@ class LogIn(MessageInteraction):
         self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
-        print(message.content, type(message.content))
         user_id = self.bot.db_client.get_user_id_by_email(message.content)
 
         if user_id:
@@ -201,6 +214,9 @@ class LogIn(MessageInteraction):
             await message.channel.send(
                 f"Sorry, I couldn't find any profile with that e-mail"
             )
+
+    async def followup_reply(self, message):
+        return
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
@@ -229,7 +245,15 @@ class SignUp(MessageInteraction):
         self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
-        await message.channel.send("You  have added  a new account $$ ")
+        email = message.content
+        user_id = self.bot.db_client.create_user(
+            email, "password"
+        )  # password via chat doesn't make sense, will change later
+
+        self.bot.store_user_id(user_id)
+
+    async def followup_reply(self, message):
+        return
 
     @commands.Cog.listener("on_message")
     async def message_router(self, message):
@@ -243,6 +267,11 @@ class SignUp(MessageInteraction):
                 and self.last_message_id == message.reference.message_id
             ):
                 await self.message_reply(message)
+            elif (
+                message.reference
+                and self.followup_message_id == message.reference.message_id
+            ):
+                await self.followup_reply(message)
 
     def setup(bot):
         bot.add_cog(SignUp(bot))
@@ -276,7 +305,7 @@ class GreetingsView(
         await interaction.response.defer()  # this is to avoid interaction fail in the UI
 
     @discord.ui.button(
-        label="Sign Up", row=0, style=discord.ButtonStyle.secondary, emoji="🔻"
+        label="Sign Up", row=0, style=discord.ButtonStyle.secondary, emoji="➕"
     )
     async def second_button_callback(
         self, button: discord.ui.Button, interaction: discord.Interaction
