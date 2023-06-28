@@ -13,7 +13,6 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm import DeclarativeBase
 
 from datetime import datetime
-from random import randint
 
 import os
 from dotenv import load_dotenv
