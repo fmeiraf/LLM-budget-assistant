@@ -172,6 +172,19 @@ class Database:
         session.commit()
         session.close()
 
+    # add function for log in
+    def log_in(self, email: str, password: str):
+        session = self.Session()
+        user = session.query(User).filter_by(email=email).first()
+        session.close()
+        if user:
+            if user and user.password == password:
+                return True
+            else:
+                return None
+        else:
+            return None
+
 
 ## Test
 
@@ -223,7 +236,11 @@ def populate_test_db():
     user_id = db.create_user(email, password)
 
     # Create an account for the user and retrieve the card ID
-    account_id = db.create_account(user_id, card_last_4_digits, account_name)
+    account_id = db.create_account(
+        user_id=user_id,
+        account_last_4_digits=card_last_4_digits,
+        account_name=account_name,
+    )
 
     # Create a category for the user and retrieve the category ID
     category_id = db.create_category(user_id, category_name)
@@ -255,3 +272,9 @@ def test_email_retriver():
 if __name__ == "__main__":
     populate_test_db()
     test_email_retriver()
+
+
+# %%
+"1234".isdigit()
+
+# %%
