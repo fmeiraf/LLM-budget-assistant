@@ -37,6 +37,9 @@ def login():
                 if is_logged_in:
                     st.success("Logged in successfully.")
                     st.session_state["logged_in"] = True
+                    st.session_state["user_id"] = is_logged_in
+                    st.session_state["user_email"] = email
+                    st.experimental_rerun()
                 # Proceed with authenticated functionality
                 else:
                     st.warning("Invalid email.")
@@ -44,3 +47,9 @@ def login():
                 st.warning("Invalid email or password.")
         else:
             st.warning("Please enter both email and password.")
+
+
+def login_status():
+    _, col2 = st.columns([0.7, 0.3])
+    if st.session_state["logged_in"]:
+        col2.text(f"Logged in as: {st.session_state['user_email']}")
