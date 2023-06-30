@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 import abc
 from dotenv import load_dotenv
-from database import Database
+from transaction_parser import TransactionParser
+
 
 load_dotenv()  # load all the variables from the env file
 
@@ -140,6 +141,9 @@ class AddTransaction(MessageInteraction):
         self.update_last_message_id(starter_message)
 
     async def message_reply(self, message):
+        # transaction_string = message.content
+        # transaction_parser = TransactionParser(transaction_string)
+        # parsed_transactions = transaction_parser.extract_transaction_info()
         await message.channel.send("You  have added  a new transaction $$ ")
 
     async def followup_reply(self, message):
