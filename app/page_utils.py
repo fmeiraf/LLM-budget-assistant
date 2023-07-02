@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
+from streamlit_extras.add_vertical_space import add_vertical_space
 from database import Database, db_config
 from dotenv import load_dotenv
 
@@ -74,3 +75,31 @@ def login_status():
 
         # Display the left-aligned Markdown
         st.markdown(login_status_text, unsafe_allow_html=True)
+        add_vertical_space(2)
+
+
+def menu():
+    # Create buttons in different colors and columns
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        if st.button(
+            ":blue[Add New Accounts 💳]",
+        ):
+            switch_page("Add new accounts")
+
+    with col2:
+        if st.button(
+            ":blue[Add New Transactions 💰]",
+        ):
+            switch_page("Add new transactions")
+
+    with col3:
+        if st.button(
+            ":green[Transaction Summary] 📈",
+        ):
+            switch_page("Transaction summary")
+
+    with col4:
+        if st.button("Financial Assistant 🧑‍🎨"):
+            switch_page("Financial ")

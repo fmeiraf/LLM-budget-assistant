@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 from database import Database, db_config
 from dotenv import load_dotenv
-from page_utils import register, login, login_status
+from page_utils import register, login, login_status, menu
+from streamlit_extras.add_vertical_space import add_vertical_space
 
 load_dotenv()
 
@@ -33,6 +34,7 @@ def main():
         login()
 
     login_status()
+    menu()
 
     # st.write(st.session_state["logged_in"])
 
