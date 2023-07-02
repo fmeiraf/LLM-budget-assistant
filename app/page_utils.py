@@ -39,7 +39,7 @@ def login():
                 if is_logged_in:
                     st.success("Logged in successfully.")
                     st.session_state["logged_in"] = True
-                    st.session_state["user_id"] = is_logged_in
+                    st.session_state["user_id"] = user_is_registered
                     st.session_state["user_email"] = email
                     st.experimental_rerun()
                 # Proceed with authenticated functionality
@@ -103,3 +103,22 @@ def menu():
     with col4:
         if st.button("Financial Assistant 🧑‍🎨"):
             switch_page("Financial ")
+
+
+def add_new_accounts():
+    account_name = st.text_input("Account Name")
+    account_last_digits = st.text_input("Last 4 digits (optional)", max_chars=4)
+
+    if st.button("Add Account"):
+        if account_name:
+            if not account_last_digits:
+                account_last_digits = "0000"
+
+            database.create_account(
+                user_id=st.session_state["user_id"],
+                account_last_4_digits=account_last_digits,
+                account_name=account_name,
+            )
+            st.success("Account added successfully.")
+        else:
+            st.warning("Please enter an account name.")
