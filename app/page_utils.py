@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_extras.switch_page_button import switch_page
 from database import Database, db_config
 from dotenv import load_dotenv
 
@@ -47,6 +48,9 @@ def login():
                 st.warning("Invalid email or password.")
         else:
             st.warning("Please enter both email and password.")
+
+    if st.button("Sign Up", type="secondary"):
+        switch_page("Sign up")
 
 
 def login_status():

@@ -25,11 +25,14 @@ if "user_email" not in st.session_state:
 def main():
     st.sidebar.success("Select a demo above.")
 
+    st.write("# Welcome to the LLM budget assistant! 👋 \n\n")
+    st.divider()
+
     if not st.session_state["logged_in"]:
+        st.markdown("#### Please log in to continue or sign up for a new account.")
         login()
 
     login_status()
-    st.write("# Welcome to Streamlit! 👋")
 
     # st.write(st.session_state["logged_in"])
 
