@@ -32,9 +32,9 @@ def main():
     if not st.session_state["logged_in"]:
         st.markdown("#### Please log in to continue or sign up for a new account.")
         login()
-
-    login_status()
-    menu()
+    else:
+        login_status()
+        menu()
 
     # st.write(st.session_state["logged_in"])
 
