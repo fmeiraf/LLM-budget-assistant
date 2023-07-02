@@ -54,6 +54,23 @@ def login():
 
 
 def login_status():
-    _, col2 = st.columns([0.7, 0.3])
+    _, col2 = st.columns([0.40, 0.60])
     if st.session_state["logged_in"]:
-        col2.text(f"Logged in as: {st.session_state['user_email']}")
+        # col2.text(f"Logged in as: {st.session_state['user_email']} 🟢")
+        style = """
+        <style>
+            .right-aligned {
+                text-align: right;
+            }
+        </style>"""
+
+        login_status_text = f"""
+            {style}
+
+        <div class="right-aligned">
+            <b>Logged in as</b> : {st.session_state['user_email']}  🟢
+        </div>
+        """
+
+        # Display the left-aligned Markdown
+        st.markdown(login_status_text, unsafe_allow_html=True)
