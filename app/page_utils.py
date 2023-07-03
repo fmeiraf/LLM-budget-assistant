@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.add_vertical_space import add_vertical_space
 from database import Database, db_config
@@ -127,19 +128,59 @@ def add_new_accounts():
 
 
 def add_new_transactions():
-    transaction_string = st.text_area(
-        "Paste your transactions here:", height=300, key="transaction_input"
-    )
+    title_container = st.empty()
+    add_vertical_space(1)
+    message_container = st.empty()
+    add_vertical_space(1)
+    input_container = st.empty()
+    submit_container = st.empty()
+    output_container = st.empty()
 
-    if st.button("Add Transactions"):
-        if transaction_string:
-            transaction_parser = TransactionParser(transaction_string)
-            with st.spinner("We are parsing your transactions ..."):
-                parsed_transactions = transaction_parser.parse_transactions()
-            # database.create_transactions(
-            #     user_id=st.session_state["user_id"], transactions=transactions
-            # )
-            st.write(parsed_transactions)
-            st.success("Transactions added successfully!")
-        else:
-            st.warning("Please enter your transactions.")
+    ## state 1: parsed_transactions is empty
+    if st.session_state["parsed_transactions"]:
+        title_container.markdown("### Review your Transactions")
+
+        message_container.markdown(
+            "Review your transactions and make changes as needed."
+        )
+
+        raw_dataframe = pd.DataFrame(st.session_state["parsed_transactions"])
+        transaction_dt = (
+            raw_dataframe.loc[
+                :, ["transaction_date", "transaction_description", "debit", "category"]
+            ]
+            .copy()
+            .rename(columns={"debit": "amount"})
+        )
+
+        output_container.data_editor(
+            transaction_dt,
+            column_config={
+                "category": st.column_config.SelectboxColumn(
+                    options=["Food", "Transportation", "Entertainment", "Other"]
+                )
+            },
+            key="editable_transactions",
+        )
+    ## state 2: parsed_transactions is empty
+    else:
+        title_container.markdown("### Add New Transactions")
+        input_container.text_area(
+            "Paste your transactions here:", height=300, key="transaction_input"
+        )
+        if submit_container.button("Process Transactions"):
+            if st.session_state["transaction_input"]:
+                transaction_parser = TransactionParser(
+                    st.session_state["transaction_input"]
+                )
+                with st.spinner("We are parsing your transactions ..."):
+                    st.session_state[
+                        "parsed_transactions"
+                    ] = transaction_parser.parse_transactions()
+
+                input_container.empty()
+                title_container.empty()
+                submit_container.empty()
+                st.experimental_rerun()
+            else:
+                st.warning("Please enter your transactions.")
