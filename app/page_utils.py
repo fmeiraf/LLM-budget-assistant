@@ -2,6 +2,8 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.add_vertical_space import add_vertical_space
 from database import Database, db_config
+from transaction_parser import TransactionParser
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -122,3 +124,21 @@ def add_new_accounts():
             st.success("Account added successfully.")
         else:
             st.warning("Please enter an account name.")
+
+
+def add_new_transactions():
+    transaction_string = st.text_area(
+        "Paste your transactions here:", height=300, key="transaction_input"
+    )
+
+    if st.button("Add Transactions"):
+        if transaction_string:
+            transaction_parser = TransactionParser(transaction_string)
+            parsed_transactions = transaction_parser.parse_transactions()
+            # database.create_transactions(
+            #     user_id=st.session_state["user_id"], transactions=transactions
+            # )
+            st.write(parsed_transactions)
+            st.success("Transactions added successfully!")
+        else:
+            st.warning("Please enter your transactions.")
