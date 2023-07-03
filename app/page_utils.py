@@ -134,7 +134,8 @@ def add_new_transactions():
     if st.button("Add Transactions"):
         if transaction_string:
             transaction_parser = TransactionParser(transaction_string)
-            parsed_transactions = transaction_parser.parse_transactions()
+            with st.spinner("We are parsing your transactions ..."):
+                parsed_transactions = transaction_parser.parse_transactions()
             # database.create_transactions(
             #     user_id=st.session_state["user_id"], transactions=transactions
             # )

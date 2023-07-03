@@ -30,12 +30,5 @@ def main():
         st.warning("Please log in to continue.")
         login()
 
-
-
-
-
-    
-
-
 if __name__ == "__main__":
     main()
