@@ -159,12 +159,23 @@ def add_new_transactions():
             .rename(columns={"debit": "amount"})
         )
 
+        # processing the categories already used by the customer
+        database_categories = database.get_all_categories_by_user_id(
+            st.session_state["user_id"]
+        )
+        llm_proposed_categories = [
+            obj["category"] for obj in st.session_state["parsed_transactions"]
+        ]
+
+        all_categs = set()
+        for category in database_categories + llm_proposed_categories:
+            all_categs.add(category)
+        final_categories = sorted(all_categs, key=lambda x: x.lower())
+
         st.data_editor(
             transaction_dt,
             column_config={
-                "category": st.column_config.SelectboxColumn(
-                    options=["Food", "Transportation", "Entertainment", "Other"]
-                )
+                "category": st.column_config.SelectboxColumn(options=final_categories)
             },
             key="editable_transactions",
         )

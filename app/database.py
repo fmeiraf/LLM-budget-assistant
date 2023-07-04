@@ -149,9 +149,12 @@ class Database:
 
     def get_all_categories_by_user_id(self, user_id: int):
         session = self.Session()
-        categories = (
-            session.query(Category).filter_by(user_id=user_id).order_by("category_name")
-        )
+        categories = [
+            category.category_name
+            for category in session.query(Category)
+            .filter_by(user_id=user_id)
+            .order_by("category_name")
+        ]
         session.close()
         return categories
 
