@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
-from page_utils import login_status, login, add_new_transactions
+from page_utils import login_status, login, add_new_transactions, add_new_transactions__
 
 
 if "show_transaction_input" not in st.session_state:
@@ -39,7 +39,7 @@ def main():
         """
         )
         add_vertical_space(2)
-        add_new_transactions()
+        add_new_transactions__()
 
     else:
         st.warning("Please log in to continue.")

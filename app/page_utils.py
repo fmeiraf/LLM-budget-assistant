@@ -131,18 +131,28 @@ def add_new_transactions():
     title_container = st.empty()
     add_vertical_space(1)
     message_container = st.empty()
+    categ_input_container = st.empty()
+    categ_submit_container = st.empty()
     add_vertical_space(1)
     input_container = st.empty()
-    submit_container = st.empty()
     output_container = st.empty()
+    submit_container = st.empty()
 
     ## state 1: parsed_transactions is empty
     if st.session_state["parsed_transactions"]:
         title_container.markdown("### Review your Transactions")
 
         message_container.markdown(
-            "Review your transactions and make changes as needed."
+            "Review your transactions and make changes as needed (mostly check the proposed categories). You can use the space below to add new categories if you need to."
         )
+
+        ## section to add new categories
+        # categ_input_container.text_input("Add new category:", key="new_category")
+        with st.form("new_category_form"):
+            st.text_input("Add new category:", key="new_category")
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                st.write("New category added!")
 
         raw_dataframe = pd.DataFrame(st.session_state["parsed_transactions"])
         transaction_dt = (
@@ -181,6 +191,70 @@ def add_new_transactions():
                 input_container.empty()
                 title_container.empty()
                 submit_container.empty()
+                st.experimental_rerun()
+            else:
+                st.warning("Please enter your transactions.")
+
+
+def add_new_transactions__():
+    ## state 1: parsed_transactions is empty
+    if st.session_state["parsed_transactions"]:
+        st.markdown("### Review your Transactions")
+
+        st.markdown(
+            "Review your transactions and make changes as needed (mostly check the proposed categories). You can use the space below to add new categories if you need to."
+        )
+
+        ## section to add new categories
+        with st.form("new_category_form", clear_on_submit=True):
+            new_category = st.text_input("Add new category:", key="new_category")
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                if new_category:
+                    database.create_category(
+                        user_id=st.session_state["user_id"], category_name=new_category
+                    )
+                    st.success(f"'{new_category}' successfully added to categories!")
+                else:
+                    st.warning("Please enter a category name.")
+
+        ## section to edit transactions
+        raw_dataframe = pd.DataFrame(st.session_state["parsed_transactions"])
+        transaction_dt = (
+            raw_dataframe.loc[
+                :, ["transaction_date", "transaction_description", "debit", "category"]
+            ]
+            .copy()
+            .rename(columns={"debit": "amount"})
+        )
+
+        st.data_editor(
+            transaction_dt,
+            column_config={
+                "category": st.column_config.SelectboxColumn(
+                    options=["Food", "Transportation", "Entertainment", "Other"]
+                )
+            },
+            key="editable_transactions",
+        )
+        if st.button("Save Transactions", type="primary"):
+            st.success("Transactions saved successfully!")
+    ## state 2: parsed_transactions is empty
+    else:
+        st.markdown("### Add New Transactions")
+        st.text_area(
+            "Paste your transactions here:", height=300, key="transaction_input"
+        )
+        if st.button("Process Transactions"):
+            if st.session_state["transaction_input"]:
+                transaction_parser = TransactionParser(
+                    st.session_state["transaction_input"]
+                )
+                with st.spinner("We are parsing your transactions ..."):
+                    st.session_state[
+                        "parsed_transactions"
+                    ] = transaction_parser.parse_transactions()
+
                 st.experimental_rerun()
             else:
                 st.warning("Please enter your transactions.")
