@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
-from page_utils import login_status, login, add_new_transactions, add_new_transactions__
+from page_utils import login_status, login, add_new_transactions
 
 
 if "show_transaction_input" not in st.session_state:
@@ -41,8 +41,8 @@ def main():
             \n- You can edit or delete transactions from the summary page.
             """
             )
-            add_vertical_space(2)
-            add_new_transactions__()
+            add_vertical_space(1)
+            add_new_transactions()
 
 
 if __name__ == "__main__":
