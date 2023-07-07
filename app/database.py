@@ -147,6 +147,19 @@ class Database:
         session.close()
         return account_id
 
+    def get_category_id_by_name(self, user_id: int, category_name: str):
+        session = self.Session()
+        category = (
+            session.query(Category)
+            .filter_by(user_id=user_id, category_name=category_name)
+            .first()
+        )
+        session.close()
+        if category:
+            return category.category_id
+        else:
+            return None
+
     def get_all_categories_by_user_id(self, user_id: int):
         session = self.Session()
         categories = [
