@@ -124,6 +124,17 @@ class Database:
         else:
             return None
 
+    def get_all_accounts_by_user_id(self, user_id: int):
+        session = self.Session()
+        accounts = [
+            account.account_name
+            for account in session.query(Account)
+            .filter_by(user_id=user_id)
+            .order_by("account_name")
+        ]
+        session.close()
+        return accounts
+
     def create_account(
         self,
         user_id: int,
@@ -296,9 +307,3 @@ def test_email_retriver():
 if __name__ == "__main__":
     populate_test_db()
     test_email_retriver()
-
-
-# %%
-"1234".isdigit()
-
-# %%
