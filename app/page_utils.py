@@ -127,13 +127,36 @@ def add_new_accounts():
             st.warning("Please enter an account name.")
 
 
+def add_new_category(category_name: str, user_id: int):
+    # check if category already exists
+    category_id = database.get_category_id_by_name(
+        user_id=user_id, category_name=category_name
+    )
+
+    if category_id:
+        # st.warning(f"'{category_name}' already exists in categories!")
+        return category_id
+    else:
+        # st.success(f"'{category_name}' successfully added to categories!")
+        return database.create_category(user_id=user_id, category_name=category_name)
+
+
+def add_new_categories(categories: list, user_id: int):
+    category_ids = {}
+    for category in categories:
+        category_ids[category] = add_new_category(
+            category_name=category, user_id=user_id
+        )
+    return category_ids
+
+
 def add_new_transactions():
     ## state 1: parsed_transactions is empty
     if st.session_state["parsed_transactions"]:
         st.markdown("### Review your Transactions")
 
         st.markdown(
-            "Review your transactions and make changes as needed (mostly check the proposed categories). You can use the space below to add new categories if you need to."
+            "Review your transactions and make changes as needed (mostly check the suggested categories). You can use the space below to add new categories if you need to."
         )
 
         ## section to add new categories
@@ -172,15 +195,65 @@ def add_new_transactions():
             all_categs.add(category)
         final_categories = sorted(all_categs, key=lambda x: x.lower())
 
-        st.data_editor(
+        edited_data = st.data_editor(
             transaction_dt,
             column_config={
                 "category": st.column_config.SelectboxColumn(options=final_categories)
             },
-            key="editable_transactions",
+            key="edit_history",
         )
-        if st.button("Save Transactions", type="primary"):
+
+        # adding dropdown for accounts
+        st.markdown("### Submit your transactions")
+        accounts = database.get_all_accounts_by_user_id(st.session_state["user_id"])
+        account_selected = st.selectbox(
+            "Select an account (where these transactions will be added):", accounts
+        )
+
+        if st.button("Submit Transactions", type="primary"):
+            # checking categories
+            categories = edited_data["category"].unique()
+            category_ids = add_new_categories(categories, st.session_state["user_id"])
+            if not category_ids:
+                st.warning(
+                    "Please make sure you have categories assigned to all your transactions."
+                )
+
+            # checking account selection
+            account_id = database.get_account_id_by_name(
+                user_id=st.session_state["user_id"], account_name=account_selected
+            )
+            if not account_id:
+                st.warning("Please select an account.")
+
+            # adding transactions to database
+
+            # rebuilding the transactions object:
+            insert_data = []
+            for transaction in edited_data.to_dict("records"):
+                insert_data.append(
+                    {
+                        "transaction_date": transaction["transaction_date"],
+                        "transaction_description": transaction[
+                            "transaction_description"
+                        ],
+                        "credit": 0,
+                        "debit": transaction["amount"],
+                        "account_id": account_id,
+                        "category_id": category_ids[transaction["category"]],
+                        "user_id": st.session_state["user_id"],
+                    }
+                )
+
+            database.create_transactions(
+                user_id=st.session_state["user_id"], transactions=insert_data
+            )
+            # print(edited_data.to_dict("records"))
             st.success("Transactions saved successfully!")
+
+            # cleaning all variables used on transaction insertion
+            # account_id
+
     ## state 2: parsed_transactions is empty
     else:
         st.markdown("### Add New Transactions")
