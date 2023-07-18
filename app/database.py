@@ -207,6 +207,17 @@ class Database:
         session.commit()
         session.close()
 
+    def get_all_transactions_by_user_id(self, user_id: int):
+        session = self.Session()
+        transactions = [
+            transaction
+            for transaction in session.query(Transaction)
+            .filter_by(user_id=user_id)
+            .order_by("transaction_date")
+        ]
+        session.close()
+        return transactions
+
     # add function for log in
     def log_in(self, email: str, password: str):
         session = self.Session()
