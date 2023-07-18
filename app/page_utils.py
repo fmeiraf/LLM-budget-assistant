@@ -283,7 +283,7 @@ def convert_transactions_to_dataframe(user_id: int):
                 "transaction_date": transaction.transaction_date,
                 "transaction_description": transaction.transaction_description,
                 "credit": transaction.credit,
-                "debit": transaction.debit,
+                "amount": transaction.debit,
                 "account_id": transaction.account_id,
                 "category_id": transaction.category_id,
                 "user_id": transaction.user_id,
@@ -295,8 +295,44 @@ def convert_transactions_to_dataframe(user_id: int):
     return df
 
 
-def overall_transaction_summary(user_id: int, data=pd.DataFrame()):
-    tab1, tab2 = st.tabs(["Spending Trend", "Transaction Histogram"])
+def overall_speding_trend(data=pd.DataFrame()):
+    if not data.empty:
+        tab1, tab2 = st.tabs(["Monthly", "Daily"])
 
-    with tab1:
-        st.write("test")
+        with tab1:
+            # Trend line per month
+            monthly_spending = (
+                data.copy()
+                .assign(
+                    transaction_date=lambda x: pd.to_datetime(x["transaction_date"])
+                )
+                .assign(
+                    transaction_month=lambda x: x["transaction_date"].dt.strftime(
+                        "%m-%y"
+                    )
+                )
+                .loc[lambda x: x.amount.notnull()]
+                .groupby("transaction_month")
+                .agg({"amount": "sum"})
+                .reset_index()
+            )
+
+            monthly_line_trend = px.line(
+                monthly_spending,
+                x="transaction_month",
+                y="amount",
+                markers=True,
+            )
+            st.plotly_chart(monthly_line_trend)
+
+        with tab2:
+            # Trend line per day
+            daily_line_trend = px.line(
+                data,
+                x="transaction_date",
+                y="amount",
+                markers=True,
+            )
+            st.plotly_chart(daily_line_trend)
+    else:
+        st.warning("No transactions found.")

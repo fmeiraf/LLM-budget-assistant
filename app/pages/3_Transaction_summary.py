@@ -4,7 +4,7 @@ from page_utils import (
     login_status,
     login,
     convert_transactions_to_dataframe,
-    overall_transaction_summary,
+    overall_speding_trend,
 )
 
 # if "transaction_dataframe" not in st.session_state:
@@ -24,7 +24,8 @@ def main():
         data = convert_transactions_to_dataframe(user_id=st.session_state["user_id"])
 
         # Overall sumamry
-        st.write("### Overall Summary")
+        st.write("### Spending trend")
+        overall_speding_trend(data)
 
         # Spending category summary
         add_vertical_space(1)
