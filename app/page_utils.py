@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.add_vertical_space import add_vertical_space
 from database import Database, db_config
@@ -271,3 +272,31 @@ def add_new_transactions():
                 st.experimental_rerun()
             else:
                 st.warning("Please enter your transactions.")
+
+
+def convert_transactions_to_dataframe(user_id: int):
+    transactions = database.get_all_transactions_by_user_id(user_id=user_id)
+    df = pd.DataFrame(
+        [
+            {
+                "transaction_id": transaction.transaction_id,
+                "transaction_date": transaction.transaction_date,
+                "transaction_description": transaction.transaction_description,
+                "credit": transaction.credit,
+                "debit": transaction.debit,
+                "account_id": transaction.account_id,
+                "category_id": transaction.category_id,
+                "user_id": transaction.user_id,
+            }
+            for transaction in transactions
+        ]
+    )
+
+    return df
+
+
+def overall_transaction_summary(user_id: int, data=pd.DataFrame()):
+    tab1, tab2 = st.tabs(["Spending Trend", "Transaction Histogram"])
+
+    with tab1:
+        st.write("test")
