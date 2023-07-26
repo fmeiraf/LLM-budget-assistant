@@ -341,10 +341,22 @@ def overall_speding_trend(data=pd.DataFrame()):
 
 def category_stacked_bars(data=pd.DataFrame()):
     if not data.empty:
+        # aggregating the category spending type by month
+        category_spending = (
+            data.copy()
+            .assign(transaction_date=lambda x: pd.to_datetime(x["transaction_date"]))
+            .assign(
+                transaction_month=lambda x: x["transaction_date"].dt.strftime("%m-%y")
+            )
+            .loc[lambda x: x.amount.notnull()]
+            .groupby(["transaction_month", "category"])
+            .agg({"amount": "sum"})
+            .reset_index()
+        )
         # Stacked bar chart
         stacked_bar_chart = px.bar(
-            data,
-            x="transaction_date",
+            category_spending,
+            x="transaction_month",
             y="amount",
             color="category",
             barmode="stack",
