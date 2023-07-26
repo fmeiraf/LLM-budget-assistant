@@ -23,9 +23,21 @@ This bot has the database and pgadmin running on separate (but connected) contai
   - docker volume rm llm-budget-assistant_postgres
   - docker volume rm llm-budget-assistant_pgadmin
 
+### For updates in the enviroment specs
+
+To make sure new changes in dependencies are correctly added to requirements ( and are easily usable afterwards..):
+
+After new additions run:
+
+`pip list --format=freeze > requirements.txt`
+
+For fresh enviroment installations:
+
+`pip install -r requirements.txt`
+
 # Tech stack
 
-- **Frontend** : Discord/pycord
+- **Frontend** : Discord/pycord and Streamlit
 - **Database**: PostgreSQL
-- **LLM**: GPT 3.5 (or other OpenAI model..)
-- **Prompting management**: [Guardrails-ai](https://shreyar.github.io/guardrails/)
+- **LLM**: GPT 3.5 and soon Llama 2.
+- **Prompting management**: [Guardrails-ai](https://shreyar.github.io/guardrails/) and Langchain.
