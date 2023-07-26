@@ -5,6 +5,7 @@ from page_utils import (
     login,
     convert_transactions_to_dataframe,
     overall_speding_trend,
+    category_stacked_bars,
 )
 
 # if "transaction_dataframe" not in st.session_state:
@@ -30,6 +31,7 @@ def main():
         # Spending category summary
         add_vertical_space(1)
         st.write("### Spending Category Summary")
+        category_stacked_bars(data)
 
 
 if __name__ == "__main__":

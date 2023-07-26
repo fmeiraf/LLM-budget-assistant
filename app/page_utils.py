@@ -287,8 +287,9 @@ def convert_transactions_to_dataframe(user_id: int):
                 "account_id": transaction.account_id,
                 "category_id": transaction.category_id,
                 "user_id": transaction.user_id,
+                "category": category.category_name,
             }
-            for transaction in transactions
+            for transaction, category in transactions
         ]
     )
 
@@ -334,5 +335,21 @@ def overall_speding_trend(data=pd.DataFrame()):
                 markers=True,
             )
             st.plotly_chart(daily_line_trend)
+    else:
+        st.warning("No transactions found.")
+
+
+def category_stacked_bars(data=pd.DataFrame()):
+    if not data.empty:
+        # Stacked bar chart
+        stacked_bar_chart = px.bar(
+            data,
+            x="transaction_date",
+            y="amount",
+            color="category",
+            barmode="stack",
+            title="Spending by Category",
+        )
+        st.plotly_chart(stacked_bar_chart)
     else:
         st.warning("No transactions found.")
