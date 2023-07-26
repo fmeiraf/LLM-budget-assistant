@@ -83,6 +83,7 @@ class Transaction(Base):
     category_id = Column(Integer, ForeignKey("categories.category_id"))
     user_id = Column(Integer, ForeignKey("users.user_id"))
     user = relationship("User", backref="user_transactions")
+    # category = relationship("Category", backref="category_transactions")
 
 
 class Database:
@@ -209,11 +210,17 @@ class Database:
 
     def get_all_transactions_by_user_id(self, user_id: int):
         session = self.Session()
+        # add category name
         transactions = [
-            transaction
-            for transaction in session.query(Transaction)
-            .filter_by(user_id=user_id)
+            (
+                transaction,
+                category,
+            )  # this is actually a tuple transaction_obj, category_obj
+            for transaction, category in session.query(Transaction, Category)
+            .join(Category, Transaction.category_id == Category.category_id)
             .order_by("transaction_date")
+            .filter_by(user_id=user_id)
+            # bring category_name from categories table
         ]
         session.close()
         return transactions
