@@ -1,62 +1,106 @@
 import tiktoken
+import dotenv
+import os
+from guardrails_specs.specs import rail_str
+import guardrails as gd
+
+
+dotenv.load_dotenv()
+
+MODEL = os.getenv("OPENAI_MODEL_NAME")
+MAX_TOKENS = 2000
 
 
 class TokenValidator:
-    def __init__(self, model: str):
+    def __init__(self, model: str, base_prompt: str, max_tokens_threshold: int = 3000):
         self.model = model
+        self.max_tokens_threshold = max_tokens_threshold
+        self.base_prompt = base_prompt
+        self.encoder = tiktoken.encoding_for_model(self.model)
+        self.base_prompt_tokens = 0
+        self.max_transactions_tokens = 0
+        self.initial_set_up_done = False
+        self.result = []
 
-    def get_token_count(self, input: str):
-        enc = tiktoken.encoding_for_model(self.model)
-        return len(enc.encode(input))
+    def encode(self, input: str) -> list[int]:
+        return self.encoder.encode(input)
 
-    def is_valid_count(
-        self, base_prompt: str, transaction_input: str, max_tokens_threshold: int = 2000
-    ):
-        base_prompt_tokens = self.get_token_count(
-            base_prompt
-        )  # need to add a way to inject the prompt template with transaction_input (might add guardrails obj as class attribute)
-        transaction_input_tokens = self.get_token_count(transaction_input)
-        final_expected_tokens = (
-            (base_prompt_tokens + transaction_input_tokens) * 2
-        ) + transaction_input_tokens  # * 2 here because we are adding the prompt and the response
-        self.expected_tokens = final_expected_tokens
-        return final_expected_tokens <= max_tokens_threshold
+    def decode(self, tokens: list[int]) -> str:
+        return self.encoder.decode(tokens)
 
-    def split_tokens(
-        self,
-        input: str,
-        str_sep: str = "\n",
-        split_factor: int = 2,
-    ):
-        split_input = input.split(str_sep)
-        split_divider = len(split_input) // split_factor
+    def get_token_count(self, input: str) -> int:
+        return len(self.encode(input))
 
-        splitted_inputs = [
-            str_sep.join(split_input[i : i + split_divider])
-            for i in range(0, len(split_input), split_divider)
-        ]
+    def set_up_initial_counts(self):
+        # getting base propmpt token counts for future use
+        self.base_prompt_tokens = self.get_token_count(self.base_prompt)
 
-        return splitted_inputs
+        # getting max transactions tokens for future use``
+        self.max_transactions_tokens = int(
+            (self.max_tokens_threshold - (2 * self.base_prompt_tokens)) / 3
+        )
 
-    def validate_input(
-        self, inputs: list[str], base_prompt: str, max_tokens_threshold: int = 2000
-    ):
-        final_inputs = []
-        for input in inputs:
-            if self.is_valid_count(
-                base_prompt=base_prompt,
-                transaction_input=input,
-                max_tokens_threshold=max_tokens_threshold,
-            ):
-                final_inputs.append(
-                    (input, self.expected_tokens)
-                )  # when inputs are invalid the return value will be a list, so just making this standard
-            else:
-                new_input = self.split_tokens(input=input)
-                return self.validate_input(
-                    inputs=new_input,
-                    base_prompt=base_prompt,
-                    max_tokens_threshold=max_tokens_threshold,
+        self.initial_set_up_done = True
+
+    def calculate_expected_final_tokens(self, transaction_input_tokens: int) -> int:
+        if not self.initial_set_up_done:
+            self.set_up_initial_counts()
+
+        return (
+            (self.base_prompt_tokens + transaction_input_tokens) * 2
+        ) + transaction_input_tokens
+
+    def split_tokens(self, transaction_input: str):
+        if not self.initial_set_up_done:
+            self.set_up_initial_counts()
+        transaction_input_token_count = self.get_token_count(transaction_input)
+        transaction_input_tokens = self.encode(transaction_input)
+
+        print("max_tokens_threshold", self.max_transactions_tokens)
+        print("initial_count", transaction_input_token_count)
+
+        # when the input is less than the max tokens threshold
+        if transaction_input_token_count <= self.max_transactions_tokens:
+            self.result.append(
+                (
+                    transaction_input,
+                    self.calculate_expected_final_tokens(transaction_input_token_count),
                 )
+            )
+        else:
+            # truncat the input to the max tokens threshold
+            self.result.append(
+                (
+                    self.decode(
+                        transaction_input_tokens[: self.max_transactions_tokens]
+                    ),
+                    self.calculate_expected_final_tokens(self.max_transactions_tokens),
+                )
+            )
+            # split the remaining tokens
+            print(
+                "split_count",
+                len(transaction_input_tokens[self.max_transactions_tokens :]),
+            )
 
-        return final_inputs
+            self.split_tokens(
+                transaction_input=self.decode(
+                    transaction_input_tokens[self.max_transactions_tokens :]
+                )
+            )
+
+    def process(self, input: str) -> list[tuple[str, int]]:
+        self.split_tokens(input)
+        return self.result
+
+
+if __name__ == "__main__":
+    with open("./app/test_data/long_transaction.txt", "r") as f:
+        test_input = f.read()
+
+    guard = gd.Guard.from_rail_string(rail_str)
+    tv = TokenValidator(model=MODEL, base_prompt=guard.base_prompt)
+
+    from rich import print as rprint
+
+    rprint(tv.process(test_input))

@@ -29,13 +29,11 @@ class TransactionParser:
         guard = gd.Guard.from_rail_string(rail_str)
         openai.api_key = OPEN_API_KEY
 
-        token_validator = TokenValidator(model=MODEL)
-
-        split_input = token_validator.validate_input(
-            inputs=[self.transaction_string],
-            base_prompt=guard.base_prompt,
-            max_tokens_threshold=MAX_TOKENS,
+        token_validator = TokenValidator(
+            model=MODEL, base_prompt=guard.base_prompt, max_tokens_threshold=MAX_TOKENS
         )
+
+        split_input = token_validator.process(input=self.transaction_string)
 
         parsed_transactions = []
         for input in split_input:
@@ -92,8 +90,9 @@ class TransactionParser:
             self.extract_transaction_info()
 
         categorized_transactions = []
+        print(self.parsed_transactions)
         for transaction in self.parsed_transactions:
-            new_transacion_obj = {**transaction["transaction_info"]}
+            new_transacion_obj = {**transaction}  # {**transaction["transaction_info"]}
             new_transacion_obj["category"] = self.categorize_transactions(
                 new_transacion_obj["transaction_description"]
             )
