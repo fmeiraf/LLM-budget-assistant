@@ -82,7 +82,7 @@ class Transaction(Base):
     account_id = Column(Integer, ForeignKey("accounts.account_id"))
     category_id = Column(Integer, ForeignKey("categories.category_id"))
     user_id = Column(Integer, ForeignKey("users.user_id"))
-    user = relationship("User", backref="user_transactions")
+    # user = relationship("User", backref="user_transactions")
     # category = relationship("Category", backref="category_transactions")
 
 
