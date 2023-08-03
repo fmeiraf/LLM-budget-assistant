@@ -7,6 +7,8 @@ from langchain.llms import OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
+from rich import print as rprint
+
 import os
 
 
@@ -48,11 +50,13 @@ class TransactionParser:
             )
 
             if validated_response is None:
+                rprint(string)
                 raise ValueError("LLM answer does not evaluate into valid object")
 
             for transaction in validated_response["transaction_list"]:
                 parsed_transactions.append(transaction)
 
+        rprint(parsed_transactions)
         self.parsed_transactions = parsed_transactions
 
         return parsed_transactions
@@ -90,12 +94,33 @@ class TransactionParser:
             self.extract_transaction_info()
 
         categorized_transactions = []
-        print(self.parsed_transactions)
         for transaction in self.parsed_transactions:
-            new_transacion_obj = {**transaction}  # {**transaction["transaction_info"]}
-            new_transacion_obj["category"] = self.categorize_transactions(
-                new_transacion_obj["transaction_description"]
-            )
+            # filtering possible obj format for transactions due to LLM randomnes
+            if (
+                transaction.get("transaction_info", {}).get("transaction_description")
+                is not None
+            ):
+                """format {transaction_info: {transaction_description: 'description'}, ...}"""
+                new_transacion_obj = {**transaction["transaction_info"]}
+            # Check for format B
+            elif transaction.get("transaction_description") is not None:
+                """format {transaction_description: 'description', ...}"""
+                new_transacion_obj = {**transaction}
+            else:
+                raise ValueError("Invalid transaction format")
+            # if
+            # new_transacion_obj = {**transaction}  # {**transaction["transaction_info"]}
+            try:
+                new_transacion_obj["category"] = self.categorize_transactions(
+                    new_transacion_obj["transaction_description"]
+                )
+            except KeyError as e:
+                rprint(e)
+                rprint(transaction)
+
+            # new_transacion_obj["category"] = self.categorize_transactions(
+            #     new_transacion_obj["transaction_description"]
+            # )
             categorized_transactions.append(new_transacion_obj)
 
         return categorized_transactions
