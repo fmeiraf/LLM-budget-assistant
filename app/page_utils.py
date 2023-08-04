@@ -352,7 +352,7 @@ def category_stacked_bars(data=pd.DataFrame()):
             .groupby(["transaction_month", "category"])
             .agg({"amount": "sum"})
             .reset_index()
-            .sort_values("category")
+            .sort_values(["category", "transaction_month"], ascending=[True, True])
         )
         # Stacked bar chart
         stacked_bar_chart = px.bar(
