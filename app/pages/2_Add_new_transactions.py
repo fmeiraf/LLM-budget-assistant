@@ -9,8 +9,14 @@ if "show_transaction_input" not in st.session_state:
 if "show_transaction_output" not in st.session_state:
     st.session_state["show_transaction_output"] = False
 
+if "input_state" not in st.session_state:
+    st.session_state["input_state"] = "no_input"
+
 if "parsed_transactions" not in st.session_state:
     st.session_state["parsed_transactions"] = []
+
+if "transaction_parser" not in st.session_state:
+    st.session_state["transaction_parser"] = None
 
 
 def main():

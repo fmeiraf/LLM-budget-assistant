@@ -23,11 +23,12 @@ class TransactionParser:
         self.transaction_string = transaction_string
         self.parsed_transactions = None
         self.llm = None
+        self.transaction_categories = {}
 
     def start_llm(self):
         self.llm = OpenAI(temperature=0)
 
-    def extract_transaction_info(self):
+    def parse_transactions(self):
         guard = gd.Guard.from_rail_string(rail_str)
         openai.api_key = OPEN_API_KEY
 
@@ -89,9 +90,33 @@ class TransactionParser:
 
         return llm_chain(transaction_description)["text"].strip()
 
-    def parse_transactions(self):
+    def generate_transaction_categories(self):
+        """This function will get transactions that appears more than once and assign all of them the same label"""
+
+        # getting unique descriptions
+        unique_descriptions = set()
+        for transactions in self.parsed_transactions:
+            unique_descriptions.add(transactions["transaction_description"])
+
+        transaction_categories = []
+        for description in unique_descriptions:
+            transaction_categories.append(
+                {
+                    "transaction_description": description,
+                    "transaction_category": self.categorize_transactions(description),
+                }
+            )
+
+        self.transaction_categories = transaction_categories
+
+        return transaction_categories
+
+    def update_transaction_categories(self, transaction_categories):
+        self.transaction_categories = transaction_categories
+
+    def add_categories(self):
         if self.parsed_transactions is None:
-            self.extract_transaction_info()
+            self.parse_transactions()
 
         categorized_transactions = []
         for transaction in self.parsed_transactions:
@@ -108,19 +133,17 @@ class TransactionParser:
                 new_transacion_obj = {**transaction}
             else:
                 raise ValueError("Invalid transaction format")
-            # if
-            # new_transacion_obj = {**transaction}  # {**transaction["transaction_info"]}
-            try:
-                new_transacion_obj["category"] = self.categorize_transactions(
-                    new_transacion_obj["transaction_description"]
-                )
-            except KeyError as e:
-                rprint(e)
-                rprint(transaction)
 
-            # new_transacion_obj["category"] = self.categorize_transactions(
-            #     new_transacion_obj["transaction_description"]
-            # )
+            # create a mapping for self.transaction_categories
+            categories = {
+                obj["transaction_description"]: obj["transaction_category"]
+                for obj in self.transaction_categories
+            }
+
+            new_transacion_obj["category"] = categories[
+                new_transacion_obj["transaction_description"]
+            ]
+
             categorized_transactions.append(new_transacion_obj)
 
         return categorized_transactions

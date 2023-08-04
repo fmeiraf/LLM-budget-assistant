@@ -152,8 +152,94 @@ def add_new_categories(categories: list, user_id: int):
 
 
 def add_new_transactions():
-    ## state 1: parsed_transactions is empty
-    if st.session_state["parsed_transactions"]:
+    if st.session_state["input_state"] == "no_input":
+        """User has not entered any transactions yet"""
+        st.markdown("### Add New Transactions")
+        transaction_input = st.text_area(
+            "Paste your transactions here:", height=300, key="transaction_input"
+        )
+        if st.button("Process Transactions"):
+            if transaction_input:
+                st.session_state["transaction_parser"] = TransactionParser(
+                    transaction_input
+                )
+                with st.spinner("We are parsing your transactions ..."):
+                    st.session_state["parsed_transactions"] = st.session_state[
+                        "transaction_parser"
+                    ].parse_transactions()
+
+                st.session_state["input_state"] = "input_processed"
+                st.experimental_rerun()
+            else:
+                st.warning("Please enter your transactions.")
+
+    elif st.session_state["input_state"] == "input_processed":
+        """Transactions were initially processed, now we want to assign categories to transactions"""
+        st.markdown("### Review your Transactions")
+
+        st.markdown(
+            "These are all the different types of transactions we identified. Please check the categories we assigned for them. You can edit them if you want to 😎"
+        )
+
+        ## select categories for all unique transactions
+
+        # processing the categories already used by the customer
+        database_categories = database.get_all_categories_by_user_id(
+            st.session_state["user_id"]
+        )
+
+        # getting LLM recommended categories
+        utransaction_categories = st.session_state[
+            "transaction_parser"
+        ].generate_transaction_categories()
+
+        categories_dt = pd.DataFrame(utransaction_categories)
+
+        llm_proposed_categories = [
+            obj["transaction_category"] for obj in utransaction_categories
+        ]
+
+        # displaying the dataframe for the customer to edit
+        all_categs = set()
+        for category in database_categories + llm_proposed_categories:
+            all_categs.add(category)
+        final_categories = sorted(all_categs, key=lambda x: x.lower())
+
+        edited_category_data = st.data_editor(
+            categories_dt,
+            column_config={
+                "transaction_category": st.column_config.SelectboxColumn(
+                    options=final_categories
+                )
+            },
+            key="category_edit_history",
+        )
+
+        if st.button("I am ok with the categories assigned!", type="primary"):
+            st.session_state["transaction_parser"].update_transaction_categories(
+                edited_category_data.to_dict("records")
+            )
+
+            st.session_state["input_state"] = "categories_assigned"
+            st.experimental_rerun()
+
+        st.divider()
+        ## section to add new categories
+        with st.form("new_category_form", clear_on_submit=True):
+            st.markdown("#### If you need more to add more categories..")
+            new_category = st.text_input("Add new category:", key="new_category")
+            submitted = st.form_submit_button("Submit")
+            if submitted:
+                if new_category:
+                    database.create_category(
+                        user_id=st.session_state["user_id"], category_name=new_category
+                    )
+                    st.success(f"'{new_category}' successfully added to categories!")
+                else:
+                    st.warning("Please enter a category name.")
+
+    else:
+        """All transaction have been processed and categories were chosen, now we need to review and submit final transaction info"""
         st.markdown("### Review your Transactions")
 
         st.markdown(
@@ -172,6 +258,10 @@ def add_new_transactions():
                     st.success(f"'{new_category}' successfully added to categories!")
                 else:
                     st.warning("Please enter a category name.")
+
+        st.session_state["parsed_transactions"] = st.session_state[
+            "transaction_parser"
+        ].add_categories()  # updating categories using inputs from LLM and the review from the user
 
         ## section to edit transactions
         raw_dataframe = pd.DataFrame(st.session_state["parsed_transactions"])
@@ -249,29 +339,10 @@ def add_new_transactions():
             database.create_transactions(
                 user_id=st.session_state["user_id"], transactions=insert_data
             )
-            # print(edited_data.to_dict("records"))
+
             st.success("Transactions saved successfully!")
 
-            # cleaning all variables used on transaction insertion
-            # account_id
-
-    ## state 2: parsed_transactions is empty
-    else:
-        st.markdown("### Add New Transactions")
-        transaction_input = st.text_area(
-            "Paste your transactions here:", height=300, key="transaction_input"
-        )
-        if st.button("Process Transactions"):
-            if transaction_input:
-                transaction_parser = TransactionParser(transaction_input)
-                with st.spinner("We are parsing your transactions ..."):
-                    st.session_state[
-                        "parsed_transactions"
-                    ] = transaction_parser.parse_transactions()
-
-                st.experimental_rerun()
-            else:
-                st.warning("Please enter your transactions.")
+        pass
 
 
 def convert_transactions_to_dataframe(user_id: int):
