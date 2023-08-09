@@ -23,7 +23,7 @@ class TransactionParser:
         self.transaction_string = transaction_string
         self.parsed_transactions = None
         self.llm = None
-        self.transaction_categories = {}
+        self.transaction_categories = None
 
     def start_llm(self):
         self.llm = OpenAI(temperature=0)
@@ -43,21 +43,19 @@ class TransactionParser:
             string, token_number = input
 
             _, validated_response = guard(
-                openai.Completion.create,
+                openai.ChatCompletion.create,
                 prompt_params={"transaction_string": string},
-                engine=MODEL,
+                model=MODEL,
                 max_tokens=token_number,
                 temperature=0.0,
             )
 
             if validated_response is None:
-                rprint(string)
                 raise ValueError("LLM answer does not evaluate into valid object")
 
             for transaction in validated_response["transaction_list"]:
-                parsed_transactions.append(transaction)
+                parsed_transactions.append(transaction["transaction_info"])
 
-        rprint(parsed_transactions)
         self.parsed_transactions = parsed_transactions
 
         return parsed_transactions
@@ -117,6 +115,11 @@ class TransactionParser:
     def add_categories(self):
         if self.parsed_transactions is None:
             self.parse_transactions()
+
+        if self.transaction_categories is None:
+            raise ValueError(
+                "Transaction categories are not defined : please run generate_transaction_categories()"
+            )
 
         categorized_transactions = []
         for transaction in self.parsed_transactions:

@@ -13,6 +13,13 @@ rail_str = """
     </list>
 </output>
 
+<instructions>
+You are a helpful assistant only capable of communicating with valid JSON, and no other text.
+
+@json_suffix_prompt_examples
+</instructions>
+
+
 <prompt>
 
 I will present you a bank statement that has the following elements:
@@ -26,7 +33,9 @@ I will present you a bank statement that has the following elements:
 I want to extract this information separately for each transaction in the bank statement below:
 
 {{transaction_string}}
-@complete_json_suffix_v2</prompt>
+@complete_json_suffix_v2
+
+</prompt>
 
 
 </rail>
