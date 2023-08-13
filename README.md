@@ -34,10 +34,3 @@ After new additions run:
 For fresh enviroment installations:
 
 `pip install -r requirements.txt`
-
-# Tech stack
-
-- **Frontend** : Discord/pycord and Streamlit
-- **Database**: PostgreSQL
-- **LLM**: GPT 3.5 and soon Llama 2.
-- **Prompting management**: [Guardrails-ai](https://shreyar.github.io/guardrails/) and Langchain.
