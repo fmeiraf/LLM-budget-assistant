@@ -165,5 +165,6 @@ data/
 .DS_Store
 
 cache/
+exports/
 
 *.zip
