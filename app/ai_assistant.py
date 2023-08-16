@@ -38,7 +38,7 @@ PANDAS_AI_BASE_PROMPT = (
 )
 
 
-class Assistant:
+class AIAssistant:
     def __init__(
         self,
         model: str,
