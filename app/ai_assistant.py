@@ -33,9 +33,11 @@ Your goal is to analyze this question and provide the following object as output
 question: {question}
 """
 
-PANDAS_AI_BASE_PROMPT = (
-    "{question}. Besides your answer provide me a plot when appropriate."
-)
+PANDAS_AI_BASE_PROMPT = "{question}"
+
+PANDAS_AI_PLOT_PROMPT = """create a plot to answer this question: {question}.
+                            If you can't create a plot, return None.
+                        """
 
 
 class AIAssistant:
@@ -52,6 +54,7 @@ class AIAssistant:
             conversational=True,
             save_charts=True,
             save_charts_path="charts",
+            enable_cache=False,
         )
         self.chat_history = []
         self.save_chat_history = save_chat_history
@@ -83,6 +86,11 @@ class AIAssistant:
         text = self.pandas_ai(
             dataframe, prompt=PANDAS_AI_BASE_PROMPT.format(question=question)
         )
+
+        self.pandas_ai(
+            dataframe, prompt=PANDAS_AI_PLOT_PROMPT.format(question=question)
+        )
+
         plot_path = self.get_last_plot_created()
 
         if self.save_chat_history:
