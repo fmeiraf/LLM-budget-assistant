@@ -168,12 +168,20 @@ def add_new_transactions():
                         "transaction_parser"
                     ].parse_transactions()
 
+                    st.session_state["transaction_categories"] = st.session_state[
+                        "transaction_parser"
+                    ].generate_transaction_categories()
+
                 st.session_state["input_state"] = "input_processed"
+
+                # gathering all information needed for reviewing transactions
+
                 st.experimental_rerun()
             else:
                 st.warning("Please enter your transactions.")
 
     elif st.session_state["input_state"] == "input_processed":
+        print(st.session_state["input_state"])
         """Transactions were initially processed, now we want to assign categories to transactions"""
         st.markdown("### Review your Transactions")
 
@@ -188,15 +196,16 @@ def add_new_transactions():
             st.session_state["user_id"]
         )
 
-        # getting LLM recommended categories
-        utransaction_categories = st.session_state[
-            "transaction_parser"
-        ].generate_transaction_categories()
+        # # getting LLM recommended categories
+        # utransaction_categories = st.session_state[
+        #     "transaction_parser"
+        # ].generate_transaction_categories()
 
-        categories_dt = pd.DataFrame(utransaction_categories)
+        categories_dt = pd.DataFrame(st.session_state["transaction_categories"])
 
         llm_proposed_categories = [
-            obj["transaction_category"] for obj in utransaction_categories
+            obj["transaction_category"]
+            for obj in st.session_state["transaction_categories"]
         ]
 
         # displaying the dataframe for the customer to edit
@@ -342,7 +351,7 @@ def add_new_transactions():
 
             st.success("Transactions saved successfully!")
 
-        pass
+    print(st.session_state["input_state"])
 
 
 def convert_transactions_to_dataframe(user_id: int):

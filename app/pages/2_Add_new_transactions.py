@@ -18,6 +18,9 @@ if "parsed_transactions" not in st.session_state:
 if "transaction_parser" not in st.session_state:
     st.session_state["transaction_parser"] = None
 
+if "transaction_categories" not in st.session_state:
+    st.session_state["transaction_categories"] = []
+
 
 def main():
     if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
