@@ -8,14 +8,14 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 from rich import print as rprint
-
 import os
-
 
 dotenv.load_dotenv()
 OPEN_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = os.getenv("OPENAI_MODEL_NAME")
 MAX_TOKENS = 2000
+
+import logging
 
 
 class TransactionParser:
@@ -24,9 +24,54 @@ class TransactionParser:
         self.parsed_transactions = None
         self.llm = None
         self.transaction_categories = None
+        logging.basicConfig(
+            filename="llm_cals.log",
+            level=logging.INFO,
+            force=True,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        )
+        self.logger = logging.getLogger(
+            __name__
+        )  # Gets or creates a logger with the name of the current module
 
     def start_llm(self):
         self.llm = OpenAI(temperature=0)
+
+        self.logger.info("Creating an instance of LLM - Transaction Parser")
+
+    def get_guard_chat_completion(self, input: str, guard: gd.Guard, token_number: int):
+        self.logger.info(
+            f"Making LLM call with {token_number} max_tokens, for input:  {input}"
+        )
+
+        raw_response, validated_response = guard(
+            openai.ChatCompletion.create,
+            prompt_params={"transaction_string": input},
+            model=MODEL,
+            max_tokens=token_number,
+            temperature=0.0,
+        )
+
+        self.logger.info(
+            f"LLM Call completed with the following response paramters: \n {raw_response}"
+        )
+
+        return validated_response
+
+    def get_chat_completion(self, prompt: str):
+        self.logger.info(f"Making LLM call with for input:  {prompt}")
+
+        response = openai.ChatCompletion.create(
+            model=MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+        )
+
+        self.logger.info(
+            f"LLM Call completed with the following response paramters: \n {response['usage']}"
+        )
+
+        return response["choices"][0]["message"]["content"]
 
     def parse_transactions(self):
         guard = gd.Guard.from_rail_string(rail_str)
@@ -42,12 +87,8 @@ class TransactionParser:
         for input in split_input:
             string, token_number = input
 
-            _, validated_response = guard(
-                openai.ChatCompletion.create,
-                prompt_params={"transaction_string": string},
-                model=MODEL,
-                max_tokens=token_number,
-                temperature=0.0,
+            validated_response = self.get_guard_chat_completion(
+                input=string, guard=guard, token_number=token_number
             )
 
             if validated_response is None:
@@ -76,17 +117,21 @@ class TransactionParser:
 
         Your transaction is: ```{transaction_description}```
 
-        Return your answer as string.
+        Category:
         """
 
         if self.llm is None:
             self.start_llm()
 
-        llm_chain = LLMChain(
-            llm=self.llm, prompt=PromptTemplate.from_template(template)
+        # llm_chain = LLMChain(
+        #     llm=self.llm, prompt=PromptTemplate.from_template(template)
+        # )
+
+        response = self.get_chat_completion(
+            prompt=template.format(transaction_description=transaction_description)
         )
 
-        return llm_chain(transaction_description)["text"].strip()
+        return response.strip()
 
     def generate_transaction_categories(self):
         """This function will get transactions that appears more than once and assign all of them the same label"""
