@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS llm_finances.transactions (
     transaction_id SERIAL PRIMARY KEY,
     transaction_date DATE NOT NULL,
     transaction_description VARCHAR(100) NOT NULL,
+    transaction_name VARCHAR(50),
     credit DECIMAL(10, 2),
     debit DECIMAL(10, 2),
     account_id INT REFERENCES llm_finances.accounts(account_id),

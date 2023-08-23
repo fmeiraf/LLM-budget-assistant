@@ -77,6 +77,7 @@ class Transaction(Base):
     transaction_id = Column(Integer, primary_key=True)
     transaction_date = Column(Date)
     transaction_description = Column(String)
+    transaction_name = Column(String)
     credit = Column(Float)
     debit = Column(Float)
     account_id = Column(Integer, ForeignKey("accounts.account_id"))
