@@ -13,6 +13,29 @@ load_dotenv()
 database = Database(**db_config)
 
 
+def convert_transactions_to_dataframe(user_id: int):
+    transactions = database.get_all_transactions_by_user_id(user_id=user_id)
+    df = pd.DataFrame(
+        [
+            {
+                "transaction_id": transaction.transaction_id,
+                "transaction_date": transaction.transaction_date,
+                "transaction_description": transaction.transaction_description,
+                "transaction_name": transaction.transaction_name,
+                "credit": transaction.credit,
+                "amount": transaction.debit,
+                "account_id": transaction.account_id,
+                "category_id": transaction.category_id,
+                "user_id": transaction.user_id,
+                "category": category.category_name,
+            }
+            for transaction, category in transactions
+        ]
+    )
+
+    return df
+
+
 def register():
     st.subheader("Create New Account")
     email = st.text_input("Email")
@@ -196,17 +219,36 @@ def add_new_transactions():
             st.session_state["user_id"]
         )
 
-        # # getting LLM recommended categories
-        # utransaction_categories = st.session_state[
-        #     "transaction_parser"
-        # ].generate_transaction_categories()
-
         categories_dt = pd.DataFrame(st.session_state["transaction_categories"])
 
         llm_proposed_categories = [
             obj["transaction_category"]
             for obj in st.session_state["transaction_categories"]
         ]
+
+        # st.write(
+        #     st.session_state["transaction_parser"].get_transaction_names(
+        #         new_transactions=pd.DataFrame(st.session_state["parsed_transactions"]),
+        #         older_transactions=convert_transactions_to_dataframe(
+        #             st.session_state["user_id"]
+        #         ),
+        #     )
+        # )
+
+        # adding transaction names to the dataframe
+        transaction_names = st.session_state[
+            "transaction_parser"
+        ].get_transaction_names(
+            new_transactions=pd.DataFrame(st.session_state["parsed_transactions"]),
+            older_transactions=convert_transactions_to_dataframe(
+                st.session_state["user_id"]
+            ),
+        )
+        categories_dt = categories_dt.merge(
+            transaction_names.loc[:, ["transaction_description", "transaction_name"]],
+            on="transaction_description",
+            how="left",
+        )
 
         # displaying the dataframe for the customer to edit
         all_categs = set()
@@ -215,7 +257,10 @@ def add_new_transactions():
         final_categories = sorted(all_categs, key=lambda x: x.lower())
 
         edited_category_data = st.data_editor(
-            categories_dt,
+            categories_dt.loc[
+                :,
+                ["transaction_description", "transaction_name", "transaction_category"],
+            ],
             column_config={
                 "transaction_category": st.column_config.SelectboxColumn(
                     options=final_categories
@@ -352,28 +397,6 @@ def add_new_transactions():
             st.success("Transactions saved successfully!")
 
     print(st.session_state["input_state"])
-
-
-def convert_transactions_to_dataframe(user_id: int):
-    transactions = database.get_all_transactions_by_user_id(user_id=user_id)
-    df = pd.DataFrame(
-        [
-            {
-                "transaction_id": transaction.transaction_id,
-                "transaction_date": transaction.transaction_date,
-                "transaction_description": transaction.transaction_description,
-                "credit": transaction.credit,
-                "amount": transaction.debit,
-                "account_id": transaction.account_id,
-                "category_id": transaction.category_id,
-                "user_id": transaction.user_id,
-                "category": category.category_name,
-            }
-            for transaction, category in transactions
-        ]
-    )
-
-    return df
 
 
 def overall_speding_trend(data=pd.DataFrame()):

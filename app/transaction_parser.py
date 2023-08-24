@@ -1,21 +1,35 @@
 import dotenv
 import guardrails as gd
 import openai
+import pandas as pd
 from guardrails_specs.specs import rail_str
 from token_validator import TokenValidator
 from langchain.llms import OpenAI
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity, linear_kernel
+from scipy.cluster.hierarchy import linkage, fcluster
 
 from rich import print as rprint
 import os
+import logging
+import re
 
 dotenv.load_dotenv()
 OPEN_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = os.getenv("OPENAI_MODEL_NAME")
 MAX_TOKENS = 2000
 
-import logging
+
+def preprocess(text):
+    # Remove special characters
+    text = re.sub(r"[^a-zA-Z\s]", "", text)
+
+    # Convert to lowercase
+    text = text.lower().strip()
+
+    return text
 
 
 class TransactionParser:
@@ -195,3 +209,114 @@ class TransactionParser:
             categorized_transactions.append(new_transacion_obj)
 
         return categorized_transactions
+
+    def proprocess_transaction_names(self, text: str):
+        # Remove special characters
+        text = re.sub(r"[^a-zA-Z\s]", "", text)
+
+        # Convert to lowercase
+        text = text.lower().strip()
+
+        return text
+
+    def clusterize_transactions(
+        self, transaction_dt: pd.DataFrame, transaction_description_col: str
+    ):
+        data = [
+            self.proprocess_transaction_names(text)
+            for text in transaction_dt[transaction_description_col]
+        ]
+
+        vectorizer = TfidfVectorizer()
+        X = vectorizer.fit_transform(data)
+
+        # Similarity measurement
+        similarity_matrix = linear_kernel(
+            X
+        )  # this is more efficiente than cosine_similarity function
+
+        # clustering
+        Z = linkage(similarity_matrix, "ward")
+        clusters = fcluster(Z, t=1.0, criterion="distance")
+
+        transaction_dt["cluster"] = clusters
+
+        return transaction_dt
+
+    def get_cluster_name(self, trasaction_descriptions: list):
+        prompt = """
+            You are a financial transactions parser specialist. You will be given some financial transactions descriptions within ``` that belong to a same cluster.  
+            Provide a shorter and concise name for this cluster
+
+            ``` {transactions}```
+
+            Provide your answer as a string. Don't use the word cluster or any thing related to that. 
+            Be as short as you can using as few words possible without losing the essence of these descriptions. 
+            If you identify that they all belong to a same company, use the company name.
+
+            Cluster name:
+        """
+
+        response = self.get_chat_completion(
+            prompt=prompt.format(transactions="\n".join(trasaction_descriptions))
+        )
+
+        return response.strip()
+
+    def get_transaction_names(
+        self, new_transactions: pd.DataFrame, older_transactions: pd.DataFrame
+    ):
+        # preparing the data
+        cols_of_interest = ["transaction_description", "transaction_name"]
+
+        all_transactions = pd.concat(
+            [
+                new_transactions,
+                older_transactions.loc[:, cols_of_interest],
+            ]
+        )
+
+        all_transactions = self.clusterize_transactions(
+            all_transactions, "transaction_description"
+        )
+
+        # if any of the transactions in the cluster has a transaction_name
+        for cluster in all_transactions["cluster"].unique():
+            cluster_transactions = all_transactions[
+                all_transactions["cluster"] == cluster
+            ]
+            # in case there are transaction_names for that same cluster on database
+            if cluster_transactions["transaction_name"].notnull().any():
+                # get transaction_name
+                transaction_name = (
+                    cluster_transactions["transaction_name"].dropna().unique()[0]
+                )
+                # update all transactions in the cluster with that transaction_name
+                all_transactions.loc[
+                    all_transactions["cluster"] == cluster, "transaction_name"
+                ] = transaction_name
+            else:
+                # call LLM to get cluster name suggestion
+                transaction_name = self.get_cluster_name(
+                    trasaction_descriptions=cluster_transactions[
+                        "transaction_description"
+                    ]
+                    .unique()
+                    .tolist()
+                )
+
+                all_transactions.loc[
+                    all_transactions["cluster"] == cluster, "transaction_name"
+                ] = transaction_name
+
+            # merging the data into the new_transactions because we only want to display the suggestion for the new transactions
+
+        new_transactions = new_transactions.merge(
+            all_transactions.loc[
+                :, ["transaction_description", "transaction_name"]
+            ].drop_duplicates("transaction_description"),
+            on="transaction_description",
+            how="left",
+        )
+
+        return new_transactions
