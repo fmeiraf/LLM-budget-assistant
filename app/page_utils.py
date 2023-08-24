@@ -321,7 +321,14 @@ def add_new_transactions():
         raw_dataframe = pd.DataFrame(st.session_state["parsed_transactions"])
         transaction_dt = (
             raw_dataframe.loc[
-                :, ["transaction_date", "transaction_description", "debit", "category"]
+                :,
+                [
+                    "transaction_date",
+                    "transaction_description",
+                    "transaction_name",
+                    "debit",
+                    "category",
+                ],
             ]
             .copy()
             .rename(columns={"debit": "amount"})
@@ -382,6 +389,7 @@ def add_new_transactions():
                         "transaction_description": transaction[
                             "transaction_description"
                         ],
+                        "transaction_name": transaction["transaction_name"],
                         "credit": 0,
                         "debit": transaction["amount"],
                         "account_id": account_id,

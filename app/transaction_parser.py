@@ -197,12 +197,24 @@ class TransactionParser:
                 raise ValueError("Invalid transaction format")
 
             # create a mapping for self.transaction_categories
+
+            # getting categories
             categories = {
                 obj["transaction_description"]: obj["transaction_category"]
                 for obj in self.transaction_categories
             }
 
             new_transacion_obj["category"] = categories[
+                new_transacion_obj["transaction_description"]
+            ]
+
+            # getting transaction names
+            tnames = {
+                obj["transaction_description"]: obj["transaction_name"]
+                for obj in self.transaction_categories
+            }
+
+            new_transacion_obj["transaction_name"] = tnames[
                 new_transacion_obj["transaction_description"]
             ]
 

@@ -199,6 +199,7 @@ class Database:
             transaction_obj = Transaction(
                 transaction_date=transaction["transaction_date"],
                 transaction_description=transaction["transaction_description"],
+                transaction_name=transaction["transaction_name"],
                 credit=transaction["credit"],
                 debit=transaction["debit"],
                 account_id=transaction["account_id"],
