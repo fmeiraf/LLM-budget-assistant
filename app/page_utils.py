@@ -364,8 +364,12 @@ def add_new_transactions():
 
         if st.button("Submit Transactions", type="primary"):
             # checking categories
-            categories = edited_data["category"].unique()
+            categories = edited_data.loc[
+                edited_data["category"].notnull(), "category"
+            ].unique()
+            print("CAAAAT", categories)
             category_ids = add_new_categories(categories, st.session_state["user_id"])
+            # print("category_ids", category_ids)
             if not category_ids:
                 st.warning(
                     "Please make sure you have categories assigned to all your transactions."
@@ -382,29 +386,36 @@ def add_new_transactions():
 
             # rebuilding the transactions object:
             insert_data = []
+            print("CAT_IDS", category_ids)
             for transaction in edited_data.to_dict("records"):
-                insert_data.append(
-                    {
-                        "transaction_date": transaction["transaction_date"],
-                        "transaction_description": transaction[
-                            "transaction_description"
-                        ],
-                        "transaction_name": transaction["transaction_name"],
-                        "credit": 0,
-                        "debit": transaction["amount"],
-                        "account_id": account_id,
-                        "category_id": category_ids[transaction["category"]],
-                        "user_id": st.session_state["user_id"],
-                    }
-                )
+                if any(value is None for value in transaction.values()):
+                    continue
+                else:
+                    insert_data.append(
+                        {
+                            "transaction_date": transaction["transaction_date"],
+                            "transaction_description": transaction[
+                                "transaction_description"
+                            ],
+                            "transaction_name": transaction["transaction_name"],
+                            "credit": 0,
+                            "debit": transaction["amount"],
+                            "account_id": account_id,
+                            "category_id": category_ids[transaction["category"]],
+                            "user_id": st.session_state["user_id"],
+                        }
+                    )
 
             database.create_transactions(
                 user_id=st.session_state["user_id"], transactions=insert_data
             )
 
             st.success("Transactions saved successfully!")
-
-    print(st.session_state["input_state"])
+            st.session_state["input_state"] = "no_input"
+            st.session_state["parsed_transactions"] = []
+            st.session_state["transaction_categories"] = []
+            st.session_state["transaction_parser"] = None
+            st.experimental_rerun()
 
 
 def overall_speding_trend(data=pd.DataFrame()):

@@ -196,17 +196,19 @@ class Database:
     def create_transactions(self, user_id: int, transactions: list):
         session = self.Session()
         for transaction in transactions:
-            transaction_obj = Transaction(
-                transaction_date=transaction["transaction_date"],
-                transaction_description=transaction["transaction_description"],
-                transaction_name=transaction["transaction_name"],
-                credit=transaction["credit"],
-                debit=transaction["debit"],
-                account_id=transaction["account_id"],
-                category_id=transaction["category_id"],
-                user_id=user_id,
-            )
-            session.add(transaction_obj)
+            if any(value is None for value in transaction.values()):
+                transaction_obj["transaction_date"] = datetime.now()
+                transaction_obj = Transaction(
+                    transaction_date=transaction["transaction_date"],
+                    transaction_description=transaction["transaction_description"],
+                    transaction_name=transaction["transaction_name"],
+                    credit=transaction["credit"],
+                    debit=transaction["debit"],
+                    account_id=transaction["account_id"],
+                    category_id=transaction["category_id"],
+                    user_id=user_id,
+                )
+                session.add(transaction_obj)
         session.commit()
         session.close()
 

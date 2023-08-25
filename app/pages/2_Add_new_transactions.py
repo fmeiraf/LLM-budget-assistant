@@ -6,8 +6,6 @@ from page_utils import login_status, login, add_new_transactions
 if "show_transaction_input" not in st.session_state:
     st.session_state["show_transaction_input"] = True
 
-if "show_transaction_output" not in st.session_state:
-    st.session_state["show_transaction_output"] = False
 
 if "input_state" not in st.session_state:
     st.session_state["input_state"] = "no_input"
