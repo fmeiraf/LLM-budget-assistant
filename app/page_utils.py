@@ -177,9 +177,11 @@ def add_new_categories(categories: list, user_id: int):
 def add_new_transactions():
     if st.session_state["input_state"] == "no_input":
         """User has not entered any transactions yet"""
-        st.markdown("### Add New Transactions")
+        st.markdown("### Part 1 - Enter your transactions")
         transaction_input = st.text_area(
-            "Paste your transactions here:", height=300, key="transaction_input"
+            "Simply copy and past your transactions here (you can get them straight from your statements or documents, no need to edit them).",
+            height=300,
+            key="transaction_input",
         )
         if st.button("Process Transactions"):
             if transaction_input:
@@ -206,11 +208,26 @@ def add_new_transactions():
     elif st.session_state["input_state"] == "input_processed":
         print(st.session_state["input_state"])
         """Transactions were initially processed, now we want to assign categories to transactions"""
-        st.markdown("### Review your Transactions")
+        st.markdown("### Part 2 - Review your Transactions")
 
         st.markdown(
-            "These are all the different types of transactions we identified. Please check the categories we assigned for them. You can edit them if you want to 😎"
+            """<span>These are all the different transactions we identified. <b><span style="color:#c27ba0">You can edit them AS YOU WANT.</span></b>. Please review carefully the following aspects below: </span>""",
+            unsafe_allow_html=True,
         )
+
+        st.markdown(
+            """
+        <ul style:"fontsize:12">
+            <li><b><span style="color:#D8EF9F">Transaction name</span></b>: We give your transactions simplified names (to make things easier 😎).</li>
+             <li><b><span style="color:#D8EF9F">Transaction category</span></b>: This is the category we believe this transactions belongs too.</li>
+        </ul>
+
+        <span><b><span style="color:#c27ba0">IMPORTANT:</span></b>: if want to create your own categories use the input below and add them, so you can find them on the Dropdown in the table.</span>
+    """,
+            unsafe_allow_html=True,
+        )
+
+        add_vertical_space(1)
 
         ## select categories for all unique transactions
 
@@ -263,8 +280,12 @@ def add_new_transactions():
             ],
             column_config={
                 "transaction_category": st.column_config.SelectboxColumn(
-                    options=final_categories
-                )
+                    "Transaction Category", options=final_categories
+                ),
+                "transaction_name": st.column_config.TextColumn("Transaction Name"),
+                "transaction_description": st.column_config.TextColumn(
+                    "Transaction Description"
+                ),
             },
             key="category_edit_history",
         )
