@@ -315,31 +315,35 @@ def add_new_transactions():
 
     else:
         """All transaction have been processed and categories were chosen, now we need to review and submit final transaction info"""
-        st.markdown("### Review your Transactions")
+        st.markdown("### Part 3 - Last check before submitting your transactions")
 
         st.markdown(
-            "Review your transactions and make changes as needed (mostly check the suggested categories). You can use the space below to add new categories if you need to."
+            """<span>We are almost there, this is how your transactions will be added (you can still edit if you want to).""",
+            unsafe_allow_html=True,
         )
 
-        ## section to add new categories
-        with st.form("new_category_form", clear_on_submit=True):
-            new_category = st.text_input("Add new category:", key="new_category")
-            submitted = st.form_submit_button("Submit")
-            if submitted:
-                if new_category:
-                    database.create_category(
-                        user_id=st.session_state["user_id"], category_name=new_category
-                    )
-                    st.success(f"'{new_category}' successfully added to categories!")
-                else:
-                    st.warning("Please enter a category name.")
+        add_vertical_space(1)
 
+        # ## section to add new categories
+        # with st.form("new_category_form", clear_on_submit=True):
+        #     new_category = st.text_input("Add new category:", key="new_category")
+        #     submitted = st.form_submit_button("Submit")
+        #     if submitted:
+        #         if new_category:
+        #             database.create_category(
+        #                 user_id=st.session_state["user_id"], category_name=new_category
+        #             )
+        #             st.success(f"'{new_category}' successfully added to categories!")
+        #         else:
+        #             st.warning("Please enter a category name.")
+
+        ## section to edit transactions
         st.session_state["parsed_transactions"] = st.session_state[
             "transaction_parser"
         ].add_categories()  # updating categories using inputs from LLM and the review from the user
 
-        ## section to edit transactions
         raw_dataframe = pd.DataFrame(st.session_state["parsed_transactions"])
+
         transaction_dt = (
             raw_dataframe.loc[
                 :,
@@ -371,7 +375,13 @@ def add_new_transactions():
         edited_data = st.data_editor(
             transaction_dt,
             column_config={
-                "category": st.column_config.SelectboxColumn(options=final_categories)
+                "category": st.column_config.SelectboxColumn(
+                    "Transaction Category", options=final_categories
+                ),
+                "transaction_description": None,
+                "transaction_date": st.column_config.TextColumn("Transaction Date"),
+                "transaction_name": st.column_config.TextColumn("Transaction Name"),
+                "amount": st.column_config.NumberColumn("Amount"),
             },
             key="edit_history",
         )
@@ -388,7 +398,7 @@ def add_new_transactions():
             categories = edited_data.loc[
                 edited_data["category"].notnull(), "category"
             ].unique()
-            print("CAAAAT", categories)
+
             category_ids = add_new_categories(categories, st.session_state["user_id"])
             # print("category_ids", category_ids)
             if not category_ids:
@@ -407,7 +417,7 @@ def add_new_transactions():
 
             # rebuilding the transactions object:
             insert_data = []
-            print("CAT_IDS", category_ids)
+
             for transaction in edited_data.to_dict("records"):
                 if any(value is None for value in transaction.values()):
                     continue
@@ -426,7 +436,7 @@ def add_new_transactions():
                             "user_id": st.session_state["user_id"],
                         }
                     )
-
+            print(insert_data)
             database.create_transactions(
                 user_id=st.session_state["user_id"], transactions=insert_data
             )

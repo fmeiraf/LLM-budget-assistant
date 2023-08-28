@@ -29,12 +29,6 @@ def main():
         st.write("# Add new transactions 💸")
         add_vertical_space(1)
 
-        # st.markdown(
-        #     """Here is where you can add transactions to your accounts:
-        #     """,
-        #     unsafe_allow_html=True,
-        # )
-
         if st.session_state["logged_in"]:
             # expander = st.expander("Instructions to add transactions:")
             # expander.write(
