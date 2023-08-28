@@ -129,7 +129,7 @@ def menu():
 
     with col4:
         if st.button("Financial Assistant 🧑‍🎨"):
-            switch_page("Financial ")
+            switch_page("Financial Assistant")
 
 
 def add_new_accounts():
