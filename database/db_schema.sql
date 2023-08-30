@@ -3,10 +3,18 @@ CREATE SCHEMA IF NOT EXISTS llm_finances;
 -- Table: users
 CREATE TABLE IF NOT EXISTS llm_finances.users (
     user_id SERIAL PRIMARY KEY,
-    email VARCHAR(50) NOT NULL,
+    username VARCHAR(50) NOT NULL,
     password VARCHAR(50) NOT NULL,
 
     UNIQUE (email)
+);
+
+-- Table: credits
+CREATE TABLE IF NOT EXISTS llm_finances.credits (
+    credit_id SERIAL PRIMARY KEY,
+    user_parsing_credit INT NOT NULL,
+    user_query_credit INT NOT NULL,
+    user_id INT REFERENCES llm_finances.users(user_id)
 );
 
 -- Table: accounts

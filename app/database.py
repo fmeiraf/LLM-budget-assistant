@@ -7,6 +7,7 @@ from sqlalchemy import (
     Float,
     MetaData,
     Date,
+    text,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -43,10 +44,21 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True)
     email = Column(String)
-    password = Column(String)
+    username = Column(String)
     accounts = relationship("Account", backref="users")
     categories = relationship("Category", backref="users")
     transactions = relationship("Transaction", backref="users")
+
+
+class Credit(Base):
+    __tablename__ = "credits"
+    # __table_args__ = {"schema": "llm_finances"}
+
+    credit_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"))
+    user_parsing_credit = Column(Integer, default=5)
+    user_query_credit = Column(Integer, default=10)
+    user = relationship("User", backref="user_credit")
 
 
 class Account(Base):
