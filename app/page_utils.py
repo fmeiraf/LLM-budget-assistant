@@ -38,7 +38,7 @@ def convert_transactions_to_dataframe(user_id: int):
 
 def register():
     st.subheader("Create New Account")
-    email = st.text_input("Email")
+    email = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     if st.button("Register"):
@@ -55,7 +55,7 @@ def register():
 
 def login():
     st.subheader("Log In")
-    email = st.text_input("Email")
+    email = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     if st.button("Log In"):
