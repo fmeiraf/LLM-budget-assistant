@@ -522,24 +522,9 @@ def category_stacked_bars(data=pd.DataFrame()):
 
 
 def user_credit_status(credit_type: str):
-    _, col2 = st.columns([0.40, 0.60])
     if st.session_state["logged_in"]:
-        # col2.text(f"Logged in as: {st.session_state['user_email']} 🟢")
-        style = """
-        <style>
-            .right-aligned {
-                text-align: right;
-            }
-        </style>"""
-
-        login_status_text = f"""
-            {style}
-
-        <div class="right-aligned">
-            <b>Logged in as</b> : {st.session_state['username']}  🟢
-        </div>
-        """
-
-        # Display the left-aligned Markdown
-        st.markdown(login_status_text, unsafe_allow_html=True)
-        add_vertical_space(2)
+        st.metric(
+            label=f"Credits left for {credit_type}",
+            value=st.session_state[f"{credit_type}_credits"],
+            help="For resource reasons the amount of queries you can make is limited.",
+        )

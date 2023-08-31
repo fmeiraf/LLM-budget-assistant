@@ -255,11 +255,9 @@ class Database:
 
     def get_user_add_credit(self, user_id: int):
         session = self.Session()
-        user_credit = (
-            session.query(Credit).filter_by(user_id=user_id).first().user_parsing_credit
-        )
+        user_credit = session.query(Credit).filter_by(user_id=user_id).first()
         session.close()
-        return user_credit
+        return user_credit.user_parsing_credit
 
     def update_user_add_credit(self, user_id: int, new_credit: int):
         session = self.Session()
@@ -271,11 +269,9 @@ class Database:
 
     def get_user_query_credit(self, user_id: int):
         session = self.Session()
-        user_credit = (
-            session.query(Credit).filter_by(user_id=user_id).first().user_query_credit
-        )
+        user_credit = session.query(Credit).filter_by(user_id=user_id).first()
         session.close()
-        return user_credit
+        return user_credit.user_query_credit
 
     def update_user_query_credit(self, user_id: int, new_credit: int):
         session = self.Session()

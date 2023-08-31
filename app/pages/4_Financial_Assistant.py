@@ -9,6 +9,8 @@ from page_utils import (
     convert_transactions_to_dataframe,
     overall_speding_trend,
     category_stacked_bars,
+    database,
+    user_credit_status,
 )
 
 import dotenv
@@ -29,6 +31,12 @@ def main():
         login()
     else:
         login_status()
+
+        st.session_state["query_credits"] = database.get_user_query_credit(
+            st.session_state["user_id"]
+        )
+
+        user_credit_status(credit_type="query")
 
         st.title("AI Financial Assistant 🤖")
         add_vertical_space(1)

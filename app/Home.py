@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from database import Database, db_config
 from dotenv import load_dotenv
-from page_utils import register, login, login_status, menu
+from page_utils import register, login, login_status, menu, database
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 load_dotenv()
@@ -21,6 +21,12 @@ if "user_id" not in st.session_state:
 
 if "username" not in st.session_state:
     st.session_state["username"] = None
+
+if "parsing_credits" not in st.session_state:
+    st.session_state["add_credits"] = None
+
+if "query_credits" not in st.session_state:
+    st.session_state["query_credits"] = None
 
 
 def main():

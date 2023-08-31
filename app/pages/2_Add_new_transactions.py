@@ -1,6 +1,12 @@
 import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
-from page_utils import login_status, login, add_new_transactions
+from page_utils import (
+    login_status,
+    login,
+    add_new_transactions,
+    user_credit_status,
+    database,
+)
 
 
 if "show_transaction_input" not in st.session_state:
@@ -26,6 +32,12 @@ def main():
         login()
     else:
         login_status()
+        st.session_state["parsing_credits"] = database.get_user_add_credit(
+            st.session_state["user_id"]
+        )
+
+        user_credit_status(credit_type="parsing")
+
         st.write("# Add new transactions 💸")
         add_vertical_space(1)
 
