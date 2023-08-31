@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS llm_finances.users (
     username VARCHAR(50) NOT NULL,
     password VARCHAR(50) NOT NULL,
 
-    UNIQUE (email)
+    UNIQUE (username)
 );
 
 -- Table: credits

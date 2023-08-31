@@ -38,44 +38,44 @@ def convert_transactions_to_dataframe(user_id: int):
 
 def register():
     st.subheader("Create New Account")
-    email = st.text_input("Username")
+    username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     if st.button("Register"):
-        if email and password:
-            user_is_registered = database.get_user_id_by_email(email)
+        if username and password:
+            user_is_registered = database.get_user_id_by_username(username)
             if user_is_registered:
-                st.warning("Email already registered.")
+                st.warning("username already registered.")
             else:
-                database.create_user(email, password)
+                database.create_user(username, password)
                 st.success("Registration successful. Please log in.")
         else:
-            st.warning("Please enter both email and password.")
+            st.warning("Please enter both username and password.")
 
 
 def login():
     st.subheader("Log In")
-    email = st.text_input("Username")
+    username = st.text_input("Username")
     password = st.text_input("Password", type="password")
 
     if st.button("Log In"):
-        if email and password:
-            user_is_registered = database.get_user_id_by_email(email)
+        if username and password:
+            user_is_registered = database.get_user_id_by_username(username)
             if user_is_registered:
-                is_logged_in = database.log_in(email, password)
+                is_logged_in = database.log_in(username, password)
                 if is_logged_in:
                     st.success("Logged in successfully.")
                     st.session_state["logged_in"] = True
                     st.session_state["user_id"] = user_is_registered
-                    st.session_state["user_email"] = email
+                    st.session_state["username"] = username
                     st.experimental_rerun()
                 # Proceed with authenticated functionality
                 else:
-                    st.warning("Invalid email.")
+                    st.warning("Invalid username.")
             else:
-                st.warning("Invalid email or password.")
+                st.warning("Invalid username or password.")
         else:
-            st.warning("Please enter both email and password.")
+            st.warning("Please enter both username and password.")
 
     if st.button("Sign Up", type="secondary"):
         switch_page("Sign up")
@@ -96,7 +96,7 @@ def login_status():
             {style}
 
         <div class="right-aligned">
-            <b>Logged in as</b> : {st.session_state['user_email']}  🟢
+            <b>Logged in as</b> : {st.session_state['username']}  🟢
         </div>
         """
 
@@ -519,3 +519,27 @@ def category_stacked_bars(data=pd.DataFrame()):
         st.plotly_chart(stacked_bar_chart)
     else:
         st.warning("No transactions found.")
+
+
+def user_credit_status(credit_type: str):
+    _, col2 = st.columns([0.40, 0.60])
+    if st.session_state["logged_in"]:
+        # col2.text(f"Logged in as: {st.session_state['user_email']} 🟢")
+        style = """
+        <style>
+            .right-aligned {
+                text-align: right;
+            }
+        </style>"""
+
+        login_status_text = f"""
+            {style}
+
+        <div class="right-aligned">
+            <b>Logged in as</b> : {st.session_state['username']}  🟢
+        </div>
+        """
+
+        # Display the left-aligned Markdown
+        st.markdown(login_status_text, unsafe_allow_html=True)
+        add_vertical_space(2)

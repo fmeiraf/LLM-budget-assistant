@@ -43,8 +43,8 @@ class User(Base):
     # __table_args__ = {"schema": "llm_finances"}
 
     user_id = Column(Integer, primary_key=True)
-    email = Column(String)
     username = Column(String)
+    password = Column(String)
     accounts = relationship("Account", backref="users")
     categories = relationship("Category", backref="users")
     transactions = relationship("Transaction", backref="users")
@@ -107,18 +107,18 @@ class Database:
         )
         self.Session = sessionmaker(bind=self.engine)
 
-    def get_user_id_by_email(self, email: str):
+    def get_user_id_by_username(self, username: str):
         session = self.Session()
-        user = session.query(User).filter_by(email=email).first()
+        user = session.query(User).filter_by(username=username).first()
         session.close()
         if user:
             return user.user_id
         else:
             return None
 
-    def create_user(self, email: str, password: str):
+    def create_user(self, username: str, password: str):
         session = self.Session()
-        user = User(email=email, password=password)
+        user = User(username=username, password=password)
         session.add(user)
         session.commit()
         user_id = user.user_id
@@ -241,9 +241,9 @@ class Database:
         return transactions
 
     # add function for log in
-    def log_in(self, email: str, password: str):
+    def log_in(self, username: str, password: str):
         session = self.Session()
-        user = session.query(User).filter_by(email=email).first()
+        user = session.query(User).filter_by(username=username).first()
         session.close()
         if user:
             if user and user.password == password:
@@ -252,6 +252,38 @@ class Database:
                 return None
         else:
             return None
+
+    def get_user_add_credit(self, user_id: int):
+        session = self.Session()
+        user_credit = (
+            session.query(Credit).filter_by(user_id=user_id).first().user_parsing_credit
+        )
+        session.close()
+        return user_credit
+
+    def update_user_add_credit(self, user_id: int, new_credit: int):
+        session = self.Session()
+        session.query(Credit).filter_by(user_id=user_id).update(
+            {Credit.user_parsing_credit: new_credit}
+        )
+        session.commit()
+        session.close()
+
+    def get_user_query_credit(self, user_id: int):
+        session = self.Session()
+        user_credit = (
+            session.query(Credit).filter_by(user_id=user_id).first().user_query_credit
+        )
+        session.close()
+        return user_credit
+
+    def update_user_query_credit(self, user_id: int, new_credit: int):
+        session = self.Session()
+        session.query(Credit).filter_by(user_id=user_id).update(
+            {Credit.user_query_credit: new_credit}
+        )
+        session.commit()
+        session.close()
 
 
 ## Test
