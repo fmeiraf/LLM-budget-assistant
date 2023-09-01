@@ -174,6 +174,25 @@ def add_new_categories(categories: list, user_id: int):
     return category_ids
 
 
+def credit_updater(credit_type: str):
+    if credit_type == "parsing":
+        if st.session_state["parsing_credits"] > 0:
+            st.session_state["parsing_credits"] -= 1
+            database.update_user_add_credit(
+                user_id=st.session_state["user_id"],
+                new_credit=st.session_state["parsing_credits"],
+            )
+    elif credit_type == "query":
+        if st.session_state["query_credits"] > 0:
+            st.session_state["query_credits"] -= 1
+            database.update_user_query_credit(
+                user_id=st.session_state["user_id"],
+                new_credit=st.session_state["query_credits"],
+            )
+    else:
+        raise ValueError("Invalid credit type.")
+
+
 def add_new_transactions():
     if st.session_state["input_state"] == "no_input":
         """User has not entered any transactions yet"""
@@ -184,29 +203,34 @@ def add_new_transactions():
             key="transaction_input",
         )
         if st.button("Process Transactions"):
-            if transaction_input:
-                st.session_state["transaction_parser"] = TransactionParser(
-                    transaction_input
-                )
-                with st.spinner("We are parsing your transactions ..."):
-                    st.session_state["parsed_transactions"] = st.session_state[
-                        "transaction_parser"
-                    ].parse_transactions()
+            if st.session_state["parsing_credits"] > 0:
+                if transaction_input:
+                    credit_updater(credit_type="parsing")
+                    st.session_state["transaction_parser"] = TransactionParser(
+                        transaction_input
+                    )
+                    with st.spinner("We are parsing your transactions ..."):
+                        st.session_state["parsed_transactions"] = st.session_state[
+                            "transaction_parser"
+                        ].parse_transactions()
 
-                    st.session_state["transaction_categories"] = st.session_state[
-                        "transaction_parser"
-                    ].generate_transaction_categories()
+                        st.session_state["transaction_categories"] = st.session_state[
+                            "transaction_parser"
+                        ].generate_transaction_categories()
 
-                st.session_state["input_state"] = "input_processed"
+                    st.session_state["input_state"] = "input_processed"
 
-                # gathering all information needed for reviewing transactions
+                    # gathering all information needed for reviewing transactions
 
-                st.experimental_rerun()
+                    st.experimental_rerun()
+                else:
+                    st.warning("Please enter your transactions.")
             else:
-                st.warning("Please enter your transactions.")
+                st.warning(
+                    "You have no more credits left. Sorry, you can't add more transactions."
+                )
 
     elif st.session_state["input_state"] == "input_processed":
-        print(st.session_state["input_state"])
         """Transactions were initially processed, now we want to assign categories to transactions"""
         st.markdown("### Part 2 - Review your Transactions")
 
@@ -253,14 +277,16 @@ def add_new_transactions():
         # )
 
         # adding transaction names to the dataframe
-        transaction_names = st.session_state[
-            "transaction_parser"
-        ].get_transaction_names(
-            new_transactions=pd.DataFrame(st.session_state["parsed_transactions"]),
-            older_transactions=convert_transactions_to_dataframe(
-                st.session_state["user_id"]
-            ),
-        )
+        with st.spinner("We are adding transaction names to your transactions ..."):
+            transaction_names = st.session_state[
+                "transaction_parser"
+            ].get_transaction_names(
+                new_transactions=pd.DataFrame(st.session_state["parsed_transactions"]),
+                older_transactions=convert_transactions_to_dataframe(
+                    st.session_state["user_id"]
+                ),
+            )
+
         categories_dt = categories_dt.merge(
             transaction_names.loc[:, ["transaction_description", "transaction_name"]],
             on="transaction_description",

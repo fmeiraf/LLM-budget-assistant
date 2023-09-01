@@ -281,12 +281,16 @@ class TransactionParser:
         # preparing the data
         cols_of_interest = ["transaction_description", "transaction_name"]
 
-        all_transactions = pd.concat(
-            [
-                new_transactions,
-                older_transactions.loc[:, cols_of_interest],
-            ]
-        )
+        if older_transactions.empty == True or older_transactions is None:
+            all_transactions = new_transactions.copy()
+            all_transactions["transaction_name"] = None
+        else:
+            all_transactions = pd.concat(
+                [
+                    new_transactions,
+                    older_transactions.loc[:, cols_of_interest],
+                ]
+            )
 
         all_transactions = self.clusterize_transactions(
             all_transactions, "transaction_description"
@@ -323,10 +327,13 @@ class TransactionParser:
 
             # merging the data into the new_transactions because we only want to display the suggestion for the new transactions
 
+        if "transaction_name" in new_transactions.columns:
+            new_transactions.drop(columns=["transaction_name"], inplace=True)
+
         new_transactions = new_transactions.merge(
-            all_transactions.loc[
-                :, ["transaction_description", "transaction_name"]
-            ].drop_duplicates("transaction_description"),
+            all_transactions.loc[:, ["transaction_description", "transaction_name"]]
+            .drop_duplicates("transaction_description")
+            .reset_index(),
             on="transaction_description",
             how="left",
         )
