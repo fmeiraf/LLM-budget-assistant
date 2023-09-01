@@ -5,6 +5,9 @@ services:
     platform: linux/amd64
     image: postgres
     restart: always
+    profiles:
+      - prod
+      - dev
     hostname: postgres
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -23,6 +26,8 @@ services:
     platform: linux/amd64
     image: dpage/pgadmin4
     restart: always
+    profiles:
+      - dev
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
