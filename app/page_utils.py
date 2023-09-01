@@ -49,6 +49,7 @@ def register():
             else:
                 database.create_user(username, password)
                 st.success("Registration successful. Please log in.")
+                switch_page("home")
         else:
             st.warning("Please enter both username and password.")
 
@@ -82,7 +83,7 @@ def login():
 
 
 def login_status():
-    _, col2 = st.columns([0.40, 0.60])
+    _, col2 = st.columns([0.30, 0.70])
     if st.session_state["logged_in"]:
         # col2.text(f"Logged in as: {st.session_state['user_email']} 🟢")
         style = """
@@ -102,6 +103,11 @@ def login_status():
 
         # Display the left-aligned Markdown
         st.markdown(login_status_text, unsafe_allow_html=True)
+        if st.button("Log Out", type="secondary"):
+            st.session_state["logged_in"] = False
+            st.session_state["user_id"] = None
+            st.session_state["username"] = None
+            st.experimental_rerun()
         add_vertical_space(2)
 
 
