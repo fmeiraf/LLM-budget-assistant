@@ -11,6 +11,7 @@ from page_utils import (
     category_stacked_bars,
     database,
     user_credit_status,
+    credit_updater,
 )
 
 import dotenv
@@ -67,20 +68,21 @@ def main():
                 user_id=st.session_state["user_id"]
             )
 
-            with st.spinner("Thinking..."):
-                response = assistant.chat(dataframe=data, question=prompt)
+            if st.session_state["query_credits"] > 0:
+                with st.spinner("Thinking..."):
+                    credit_updater(credit_type="query")
+                    response = assistant.chat(dataframe=data, question=prompt)
 
-            print(response)
-            # Display assistant response in chat message container
-            with st.chat_message("assistant"):
-                st.markdown(response["answer"])
-                if response["plot_path"]:
-                    st.image(response["plot_path"])
-            # Add assistant response to chat history
+                # Display assistant response in chat message container
+                with st.chat_message("assistant"):
+                    st.markdown(response["answer"])
+                    if response["plot_path"]:
+                        st.image(response["plot_path"])
+                # Add assistant response to chat history
 
-            st.session_state.messages.append(
-                {"role": "assistant", "content": response["answer"]}
-            )
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": response["answer"]}
+                )
 
 
 if __name__ == "__main__":
