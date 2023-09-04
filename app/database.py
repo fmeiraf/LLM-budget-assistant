@@ -22,7 +22,7 @@ load_dotenv()
 
 # Create the database engine
 db_config = {
-    "host": "localhost",  # running on docker locally
+    "host": "db",  # running on docker locally
     "port": "5432",
     "database": "llm_finance",
     "user": os.getenv("POSTGRES_USER"),

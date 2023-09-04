@@ -14,6 +14,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: llm_finance
       PGDATA: /data/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d llm_finance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./database/db_schema.sql:/docker-entrypoint-initdb.d/db_schema.sql
@@ -21,6 +26,26 @@ services:
       - "5432:5432"
     networks:
       - postgres
+  
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles:
+      - prod
+      - dev
+    command:
+    - python
+    - app/start_app.py
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8501:8501" # If you're using Streamlit, it defaults to 8501. Change this if necessary.
+    networks:
+      - postgres
+    volumes:
+      - .:/app
 
   pgadmin:
     platform: linux/amd64

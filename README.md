@@ -17,7 +17,7 @@ This bot has the database and pgadmin running on separate (but connected) contai
 
 - Run:
 
-  - docker-compose --profile (dev or prod) up -d
+  - docker-compose --profile (dev or prod) up -d --build --force-recreate
 
 - If you need to clean up the volumes to reset database, run:
   - docker-compose down

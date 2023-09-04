@@ -17,7 +17,7 @@ def start_streamlit():
     # run PostgreSQL triggers
 
     ## trigger SQL
-
+    print("here1")
     trigger_function_sql = text(
         f"""
     CREATE OR REPLACE FUNCTION add_credit_on_user_insertion()
@@ -43,18 +43,28 @@ def start_streamlit():
     session = database.Session()
     session.execute(trigger_function_sql)
     session.execute(trigger_sql)
-    session.commit()
+    try:
+        session.commit()
+    except Exception as e:
+        print(e)
+    # session.commit()
     session.close()
 
     # The command to run streamlit
-
-    cmd = ["streamlit", "run", "app/Home.py"]
+    print("here")
+    cmd = [
+        "streamlit",
+        "run",
+        "app/Home.py",
+        "--server.port=8501",
+        "--server.address=0.0.0.0",
+    ]
     # Use subprocess to run the command
     process = subprocess.Popen(cmd)
 
     # You can wait for the process to complete with the following line,
     # but this will block your script until the Streamlit server is terminated.
-    # process.wait()
+    process.wait()
 
 
 if __name__ == "__main__":
