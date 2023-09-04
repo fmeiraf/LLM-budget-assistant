@@ -115,7 +115,6 @@ scipy==1.11.2
 sentence-transformers==2.2.2
 sentencepiece==0.1.99
 six==1.16.0
-sklearn==0.0.post7
 smmap==5.0.0
 soupsieve==2.4.1
 SQLAlchemy==2.0.15
