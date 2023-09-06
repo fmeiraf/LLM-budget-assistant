@@ -1,5 +1,7 @@
 # LLM Budgeting Assistant
 
+_Live at:_ 💸 [**banqstream.com**](banqstream.com)
+
 This is an attempt to create a finance/budgeting assistant. This will be using LLMs to parse raw text coming from account statements and feeding this into a database used for further analysis. Among the features on this app:
 
 - Parse raw account transations
@@ -30,6 +32,10 @@ _Installing docker-compose_
 
 - `sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
 - `sudo chmod +x /usr/local/bin/docker-compose`
+
+_Add firewall rule_
+
+- Make sure you have a TCP firewall rule set up for the same port used by streamlit (default is 8501)
 
 # Running it locally
 
