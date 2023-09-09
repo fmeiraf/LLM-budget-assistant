@@ -8,8 +8,7 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 load_dotenv()
 
 st.set_page_config(
-    page_title="LLM Financial Assistant",
-    page_icon="🤖",
+    page_title="BanQstream - your LLM Financial Assistant", page_icon="🎏"
 )
 
 # state declarations
@@ -30,9 +29,10 @@ if "query_credits" not in st.session_state:
 
 
 def main():
-    st.sidebar.success("Select a demo above.")
-
-    st.write("# Welcome to the LLM budget assistant! 👋 \n\n")
+    _, col, _ = st.columns([0.30, 0.40, 0.30])
+    with col:
+        st.image("./app/assets/original_logo_small_transp.png", width=100)
+    st.write("# Welcome to BanQstream! 👋 \n\n")
     st.divider()
 
     if not st.session_state["logged_in"]:
