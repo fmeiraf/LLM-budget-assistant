@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS llm_finances;
 CREATE TABLE IF NOT EXISTS llm_finances.users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
 
     UNIQUE (username)
 );
@@ -48,3 +48,5 @@ CREATE TABLE IF NOT EXISTS llm_finances.transactions (
     category_id INT REFERENCES llm_finances.categories(category_id),
     user_id INT REFERENCES llm_finances.users(user_id)
 );
+
+

@@ -6,6 +6,8 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 from database import Database, db_config
 from transaction_parser import TransactionParser
 
+from auth import hash_password, check_password
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -39,7 +41,7 @@ def convert_transactions_to_dataframe(user_id: int):
 def register():
     st.subheader("Create New Account")
     username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    password = hash_password(st.text_input("Password", type="password")).decode()
 
     if st.button("Register"):
         if username and password:
@@ -63,8 +65,11 @@ def login():
         if username and password:
             user_is_registered = database.get_user_id_by_username(username)
             if user_is_registered:
-                is_logged_in = database.log_in(username, password)
-                if is_logged_in:
+                user_hashed_password = database.get_user_password_by_username(username)
+
+                if check_password(
+                    user_password=password, hashed_password=user_hashed_password
+                ):
                     st.success("Logged in successfully.")
                     st.session_state["logged_in"] = True
                     st.session_state["user_id"] = user_is_registered
@@ -72,9 +77,9 @@ def login():
                     st.experimental_rerun()
                 # Proceed with authenticated functionality
                 else:
-                    st.warning("Invalid username.")
+                    st.warning("Invalid password.")
             else:
-                st.warning("Invalid username or password.")
+                st.warning("Invalid username.")
         else:
             st.warning("Please enter both username and password.")
 

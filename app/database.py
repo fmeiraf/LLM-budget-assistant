@@ -116,6 +116,15 @@ class Database:
         else:
             return None
 
+    def get_user_password_by_username(self, username: str):
+        session = self.Session()
+        user = session.query(User).filter_by(username=username).first()
+        session.close()
+        if user:
+            return user.password
+        else:
+            return None
+
     def create_user(self, username: str, password: str):
         session = self.Session()
         user = User(username=username, password=password)
