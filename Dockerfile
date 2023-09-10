@@ -16,6 +16,6 @@ RUN git clone https://github.com/fmeiraf/LLM-budget-assistant.git .
 
 RUN pip3 install -r requirements.txt
 
-EXPOSE 443
+EXPOSE 80
 
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+HEALTHCHECK CMD curl --fail http://localhost:80/_stcore/health

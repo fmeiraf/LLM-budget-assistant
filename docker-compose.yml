@@ -41,7 +41,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "443:443" # If you're using Streamlit, it defaults to 8501. Change this if necessary.
+      - "80:80" # If you're using Streamlit, it defaults to 8501. Change this if necessary.
     networks:
       - postgres
     volumes:
@@ -58,7 +58,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "80:80"
+      - "60:60"
     volumes:
        - pgadmin:/var/lib/pgadmin
     networks:
