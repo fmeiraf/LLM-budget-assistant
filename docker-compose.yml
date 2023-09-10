@@ -41,7 +41,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "80:80" # If you're using Streamlit, it defaults to 8501. Change this if necessary.
+      - "8501:8501" # If you're using Streamlit, it defaults to 8501. Change this if necessary.
     networks:
       - postgres
     volumes:

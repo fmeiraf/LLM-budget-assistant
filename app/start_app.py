@@ -56,7 +56,7 @@ def start_streamlit():
         "streamlit",
         "run",
         "app/Home.py",
-        "--server.port=80",
+        "--server.port=8501",
         "--server.address=0.0.0.0",
     ]
     # Use subprocess to run the command
