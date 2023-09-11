@@ -10,33 +10,6 @@ This is an attempt to create a finance/budgeting assistant. This will be using L
 - Simple dashboard for data visualization
 - **_Enable user to talk to its own data through chat UI_**
 
-# Example running on GCP
-
-## Setting up first installation
-
-- `sudo apt-get update -y`
-
-- `sudo apt-get upgrade`
-
-_Install Docker_
-
-- `curl -fsSL https://get.docker.com -o get-docker.sh`
-
-- `sudo sh get-docker.sh`
-
-- `sudo usermod -aG docker {user}`
-
-- `newgrp docker`
-
-_Installing docker-compose_
-
-- `sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
-- `sudo chmod +x /usr/local/bin/docker-compose`
-
-_Add firewall rule_
-
-- Make sure you have a TCP firewall rule set up for the same port used by streamlit (default is 8501)
-
 # Running it locally
 
 The application is all built using docker containers. There are 3 containers, where pdadmin is only used for development.
@@ -64,6 +37,60 @@ ENVIRONMENT="PROD"
 - If you need to clean up the volumes to reset database, run:
   - `docker-compose down`
   - `docker volume rm llm-budget-assistant_pgadmin`
+
+# Running on GCP (or other cloud services)
+
+## Setting up first installation
+
+- `sudo apt-get update -y`
+
+- `sudo apt-get upgrade`
+
+_Install Docker_
+
+- `curl -fsSL https://get.docker.com -o get-docker.sh`
+
+- `sudo sh get-docker.sh`
+
+- `sudo usermod -aG docker {user}`
+
+- `newgrp docker`
+
+_Installing docker-compose_
+
+- `sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
+- `sudo chmod +x /usr/local/bin/docker-compose`
+
+_Add firewall rule_
+
+- Make sure you have a TCP firewall rule set up for the same port used by streamlit (default is 8501)
+
+_Making custom domain to work_
+
+Instal nginx ([for more reference](https://www.alibabacloud.com/blog/using-lets-encrypt-to-enable-https-for-a-streamlit-web-service_600130)):
+
+- `sudo apt-get install nginx`
+- `sudo nano /etc/nginx/sites-available/default`
+  - Add this to the file above
+  - ````server {
+        listen       80;
+        server_name  47.74.21.181; # Domain name or IP address
+        location / {
+            proxy_pass http://0.0.0.0:8501/; # Route from HTTP port 80 to Streamlit port 8501
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+            proxy_redirect off;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+    }```
+    ````
+
+Installing SSL:
+
+- `sudo apt install certbot python3-certbot-nginx`
+- `sudo certbot --nginx -d ＜Domain＞`
 
 ### For updates in the enviroment specs
 
