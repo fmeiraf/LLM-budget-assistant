@@ -31,7 +31,10 @@ if "query_credits" not in st.session_state:
 def main():
     _, col, _ = st.columns([0.30, 0.40, 0.30])
     with col:
-        st.image("./app/assets/original_logo_small_transp.png", width=100)
+        st.image(
+            "https://storage.googleapis.com/banqstream/original_logo_small_transp.png",
+            width=100,
+        )
     st.write("# Welcome to BanQstream! 👋 \n\n")
     st.divider()
 
