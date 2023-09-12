@@ -27,6 +27,8 @@ if "transaction_categories" not in st.session_state:
 
 
 def main():
+    st.write("# Add New Transactions  💳")
+    add_vertical_space(1)
     if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
         st.warning("Please log in to continue.")
         login()
@@ -38,8 +40,8 @@ def main():
 
         user_credit_status(credit_type="parsing")
 
-        st.write("# Add new transactions 💸")
-        add_vertical_space(1)
+        # st.write("# Add new transactions 💸")
+        # add_vertical_space(1)
 
         if st.session_state["logged_in"]:
             # expander = st.expander("Instructions to add transactions:")

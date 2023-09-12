@@ -27,6 +27,8 @@ if "messages" not in st.session_state:
 
 
 def main():
+    st.title("AI Financial Assistant 🤖")
+    add_vertical_space(1)
     if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
         st.warning("Please log in to continue.")
         login()
@@ -39,8 +41,8 @@ def main():
 
         user_credit_status(credit_type="query")
 
-        st.title("AI Financial Assistant 🤖")
-        add_vertical_space(1)
+        # st.title("AI Financial Assistant 🤖")
+        # add_vertical_space(1)
 
         _, col2 = st.columns([0.80, 0.20])
         with col2:
