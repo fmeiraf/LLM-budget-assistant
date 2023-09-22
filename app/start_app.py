@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 database = Database(**db_config)
-DEFAULT_ADD_CREDITS = 5
-DEFAULT_QUERY_CREDITS = 10
+DEFAULT_ADD_CREDITS = 3
+DEFAULT_QUERY_CREDITS = 5
 
 
 def start_streamlit():
