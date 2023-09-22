@@ -54,7 +54,7 @@ class TokenValidator:
         # getting base propmpt token counts for future use
         self.base_prompt_tokens = self.get_token_count(self.base_prompt)
 
-        # getting max transactions tokens for future use``
+        # getting max transactions tokens for future use
         self.max_transactions_tokens = int(
             (self.max_tokens_threshold - (2 * self.base_prompt_tokens)) / 3
         )
