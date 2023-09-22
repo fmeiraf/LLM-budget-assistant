@@ -48,6 +48,7 @@ def main():
                             account_name=account_name,
                         )
                         st.success("Account added successfully.")
+                        st.session_state["added_accounts"] = True
                     else:
                         st.warning("Please enter an account name.")
 

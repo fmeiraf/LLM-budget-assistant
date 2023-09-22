@@ -27,6 +27,15 @@ if "parsing_credits" not in st.session_state:
 if "query_credits" not in st.session_state:
     st.session_state["query_credits"] = None
 
+if "added_accounts" not in st.session_state:
+    st.session_state["added_accounts"] = False
+
+if "added_transactions" not in st.session_state:
+    st.session_state["added_transactions"] = False
+
+if "question_assistant" not in st.session_state:
+    st.session_state["question_assistant"] = False
+
 
 def main():
     _, col, _ = st.columns([0.30, 0.40, 0.30])
@@ -44,6 +53,26 @@ def main():
     else:
         login_status()
         menu()
+
+        add_vertical_space(1)
+
+        st.write("### Here is a list of things you might want to do (in sequence):")
+
+        add_account = st.checkbox(
+            "Added new accounts",
+            value=st.session_state["added_accounts"],
+            key="add_account",
+        )
+        add_transaction = st.checkbox(
+            "Add new transactions",
+            value=st.session_state["added_transactions"],
+            key="add_transaction",
+        )
+        add_question = st.checkbox(
+            "Made questions to the assistant",
+            value=st.session_state["question_assistant"],
+            key="add_question",
+        )
 
     # st.write(st.session_state["logged_in"])
 

@@ -338,6 +338,7 @@ def main():
                     )
 
                     st.success("Transactions saved successfully!")
+                    st.session_state["added_transactions"] = True
                     st.session_state["input_state"] = "no_input"
                     st.session_state["parsed_transactions"] = []
                     st.session_state["transaction_categories"] = []

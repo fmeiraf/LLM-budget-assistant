@@ -85,6 +85,7 @@ def main():
                 st.session_state.messages.append(
                     {"role": "assistant", "content": response["answer"]}
                 )
+                st.session_state["add_question"] = True
 
 
 if __name__ == "__main__":
