@@ -276,7 +276,7 @@ def main():
 
                 # adding dropdown for accounts
                 st.markdown("### Submit your transactions")
-                accounts = database.get_all_accounts_by_user_id(
+                accounts = database.get_all_accounts_names_by_user_id(
                     st.session_state["user_id"]
                 )
                 account_selected = st.selectbox(

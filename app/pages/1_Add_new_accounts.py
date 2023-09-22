@@ -1,7 +1,8 @@
 import streamlit as st
+import pandas as pd
 from streamlit_extras.add_vertical_space import add_vertical_space
 
-from page_utils import add_new_accounts, login_status, login, database
+from page_utils import login_status, login, database
 
 
 def main():
@@ -49,6 +50,24 @@ def main():
                         st.success("Account added successfully.")
                     else:
                         st.warning("Please enter an account name.")
+
+            # adding section to list all accounts
+            st.write("### Current active accounts")
+
+            account_info = database.get_all_accounts_info_by_user_id(
+                user_id=st.session_state["user_id"]
+            )
+
+            if account_info:
+                account_dt = pd.DataFrame(account_info)
+                st.dataframe(
+                    account_dt,
+                    hide_index=True,
+                    column_config={
+                        "account_name": "Account Name",
+                        "account_last_4_digits": "Last 4 digits",
+                    },
+                )
 
 
 if __name__ == "__main__":

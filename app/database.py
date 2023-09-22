@@ -147,7 +147,21 @@ class Database:
         else:
             return None
 
-    def get_all_accounts_by_user_id(self, user_id: int):
+    def get_all_accounts_info_by_user_id(self, user_id: int):
+        session = self.Session()
+        accounts = [
+            {
+                "account_name": account.account_name,
+                "account_last_4_digits": account.account_last_4_digits,
+            }
+            for account in session.query(Account)
+            .filter_by(user_id=user_id)
+            .order_by("account_name")
+        ]
+        session.close()
+        return accounts
+
+    def get_all_accounts_names_by_user_id(self, user_id: int):
         session = self.Session()
         accounts = [
             account.account_name
