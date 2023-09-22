@@ -9,6 +9,8 @@ from page_utils import (
     credit_updater,
     convert_transactions_to_dataframe,
     add_new_categories,
+    get_database_categories,
+    get_transaction_names,
     database,
 )
 
@@ -117,6 +119,9 @@ def main():
                 database_categories = database.get_all_categories_by_user_id(
                     st.session_state["user_id"]
                 )
+                # database_categories = get_database_categories(
+                #     user_id=st.session_state["user_id"]
+                # )
 
                 categories_dt = pd.DataFrame(st.session_state["transaction_categories"])
 
@@ -129,15 +134,20 @@ def main():
                 with st.spinner(
                     "We are adding transaction names to your transactions ..."
                 ):
-                    transaction_names = st.session_state[
-                        "transaction_parser"
-                    ].get_transaction_names(
-                        new_transactions=pd.DataFrame(
-                            st.session_state["parsed_transactions"]
-                        ),
-                        older_transactions=convert_transactions_to_dataframe(
-                            st.session_state["user_id"]
-                        ),
+                    # transaction_names = st.session_state[
+                    #     "transaction_parser"
+                    # ].get_transaction_names(
+                    #     new_transactions=pd.DataFrame(
+                    #         st.session_state["parsed_transactions"]
+                    #     ),
+                    #     older_transactions=convert_transactions_to_dataframe(
+                    #         st.session_state["user_id"]
+                    #     ),
+                    # )
+                    transaction_names = get_transaction_names(
+                        _parser_obj=st.session_state["transaction_parser"],
+                        parsed_transactions=st.session_state["parsed_transactions"],
+                        user_id=st.session_state["user_id"],
                     )
 
                 categories_dt = categories_dt.merge(
