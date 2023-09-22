@@ -10,11 +10,13 @@ from rich import print as rprint
 dotenv.load_dotenv()
 
 MODEL = os.getenv("OPENAI_MODEL_NAME")
-MAX_TOKENS = 2000
+MAX_TOKENS = 3000
 
 
 class TokenValidator:
-    def __init__(self, model: str, base_prompt: str, max_tokens_threshold: int = 3000):
+    def __init__(
+        self, model: str, base_prompt: str, max_tokens_threshold: int = MAX_TOKENS
+    ):
         self.model = model
         self.max_tokens_threshold = max_tokens_threshold
         self.base_prompt = base_prompt
