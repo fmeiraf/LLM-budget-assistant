@@ -69,6 +69,8 @@ def main():
                         "account_last_4_digits": "Last 4 digits",
                     },
                 )
+            else:
+                st.warning("No accounts added yet.")
 
 
 if __name__ == "__main__":
