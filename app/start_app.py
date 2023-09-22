@@ -58,6 +58,7 @@ def start_streamlit():
         "app/Home.py",
         "--server.port=8501",
         "--server.address=0.0.0.0",
+        "--client.toolbarMode=minimal",
     ]
     # Use subprocess to run the command
     process = subprocess.Popen(cmd)
