@@ -134,16 +134,6 @@ def main():
                 with st.spinner(
                     "We are adding transaction names to your transactions ..."
                 ):
-                    # transaction_names = st.session_state[
-                    #     "transaction_parser"
-                    # ].get_transaction_names(
-                    #     new_transactions=pd.DataFrame(
-                    #         st.session_state["parsed_transactions"]
-                    #     ),
-                    #     older_transactions=convert_transactions_to_dataframe(
-                    #         st.session_state["user_id"]
-                    #     ),
-                    # )
                     transaction_names = get_transaction_names(
                         _parser_obj=st.session_state["transaction_parser"],
                         parsed_transactions=st.session_state["parsed_transactions"],
@@ -172,7 +162,7 @@ def main():
                             "transaction_name",
                             "transaction_category",
                         ],
-                    ],
+                    ].drop_duplicates("transaction_description"),
                     column_config={
                         "transaction_category": st.column_config.SelectboxColumn(
                             "Transaction Category", options=final_categories
