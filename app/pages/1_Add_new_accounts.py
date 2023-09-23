@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from streamlit_extras.add_vertical_space import add_vertical_space
 
-from page_utils import login_status, login, database
+from page_utils import login_status, login, database, next_step_tip
 
 
 def main():
@@ -71,6 +71,9 @@ def main():
                 )
             else:
                 st.warning("No accounts added yet.")
+
+            add_vertical_space(1)
+            next_step_tip("Add new transactions")
 
 
 if __name__ == "__main__":

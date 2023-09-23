@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from database import Database, db_config
 from dotenv import load_dotenv
-from page_utils import register, login, login_status, menu, database
+from page_utils import register, login, login_status, menu, database, next_step_tip
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 load_dotenv()
@@ -54,6 +54,7 @@ def main():
         login_status()
         menu()
 
+        st.divider()
         add_vertical_space(1)
 
         st.write("### Here is a list of things you might want to do (in sequence):")
@@ -74,7 +75,9 @@ def main():
             key="add_question",
         )
 
-    # st.write(st.session_state["logged_in"])
+    st.divider()
+
+    next_step_tip(page_name="Add new accounts")
 
 
 if __name__ == "__main__":

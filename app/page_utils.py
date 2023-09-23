@@ -279,3 +279,13 @@ def user_credit_status(credit_type: str):
             value=st.session_state[f"{credit_type}_credits"],
             help="For resource reasons the amount of queries you can make is limited.",
         )
+
+
+def next_step_tip(page_name: str):
+    with st.container():
+        st.write(f"### 💡 Next step")
+
+        st.write(("If you are __not sure what to do__ next:"))
+
+        if st.button(f"Take me to the next step", type="primary"):
+            switch_page(page_name)
