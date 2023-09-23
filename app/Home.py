@@ -75,9 +75,9 @@ def main():
             key="add_question",
         )
 
-    st.divider()
+        st.divider()
 
-    next_step_tip(page_name="Add new accounts")
+        next_step_tip(page_name="Add new accounts")
 
 
 if __name__ == "__main__":
