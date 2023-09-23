@@ -59,7 +59,7 @@ def main():
         st.write("### Here is a list of things you might want to do (in sequence):")
 
         add_account = st.checkbox(
-            "Added new accounts",
+            "Add at least one new account",
             value=st.session_state["added_accounts"],
             key="add_account",
         )
@@ -69,7 +69,7 @@ def main():
             key="add_transaction",
         )
         add_question = st.checkbox(
-            "Made questions to the assistant",
+            "Make questions to the assistant",
             value=st.session_state["question_assistant"],
             key="add_question",
         )
