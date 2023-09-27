@@ -208,6 +208,17 @@ class Database:
         else:
             return None
 
+    def get_all_categories_info_by_user_id(self, user_id: int):
+        session = self.Session()
+        categories = {
+            category.category_name: category.category_id
+            for category in session.query(Category)
+            .filter_by(user_id=user_id)
+            .order_by("category_name")
+        }
+        session.close()
+        return categories
+
     def get_all_categories_by_user_id(self, user_id: int):
         session = self.Session()
         categories = [
@@ -243,6 +254,49 @@ class Database:
                 user_id=user_id,
             )
             session.add(transaction_obj)
+        session.commit()
+        session.close()
+
+    def update_transaction(self, user_id: int, transaction: dict):
+        session = self.Session()
+        session.query(Transaction).filter_by(
+            transaction_id=transaction["transaction_id"]
+        ).update(
+            {
+                Transaction.transaction_date: transaction["transaction_date"],
+                Transaction.transaction_description: transaction[
+                    "transaction_description"
+                ],
+                Transaction.transaction_name: transaction["transaction_name"],
+                Transaction.credit: transaction["credit"],
+                Transaction.debit: transaction["amount"],
+                Transaction.account_id: transaction["account_id"],
+                Transaction.category_id: transaction["category_id"],
+                Transaction.user_id: user_id,
+            }
+        )
+        session.commit()
+        session.close()
+
+    def update_transactions(self, user_id: int, transactions: list):
+        session = self.Session()
+        for transaction in transactions:
+            session.query(Transaction).filter_by(
+                transaction_id=transaction["transaction_id"]
+            ).update(
+                {
+                    Transaction.transaction_date: transaction["transaction_date"],
+                    Transaction.transaction_description: transaction[
+                        "transaction_description"
+                    ],
+                    Transaction.transaction_name: transaction["transaction_name"],
+                    Transaction.credit: transaction["credit"],
+                    Transaction.debit: transaction["amount"],
+                    Transaction.account_id: transaction["account_id"],
+                    Transaction.category_id: transaction["category_id"],
+                    Transaction.user_id: user_id,
+                }
+            )
         session.commit()
         session.close()
 
