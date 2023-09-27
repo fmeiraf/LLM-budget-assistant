@@ -48,6 +48,7 @@ def main():
         edited_data = st.data_editor(
             data,
             hide_index=True,
+            num_rows="dynamic",
             column_config={
                 "transaction_name": "Name",
                 "transaction_description": "Description",
@@ -68,37 +69,64 @@ def main():
 
         edited_transactions = st.session_state["edited_transactions"]
 
+        st.write(edited_transactions)
+
+        # If rows are updated or deleted
+        is_updated = False
         if edited_transactions["edited_rows"]:
-            # creating the upsert data
-            updated_transactions = []
-            for row_edited in edited_transactions["edited_rows"].keys():
-                new_data = edited_data.iloc[int(row_edited)].to_dict()
-                for modified_column in edited_transactions["edited_rows"][row_edited]:
-                    if modified_column == "category":
-                        new_data["category_id"] = int(
-                            user_categories[
-                                edited_transactions["edited_rows"][row_edited][
-                                    modified_column
-                                ]
-                            ],
-                        )
+            is_updated = True
 
-                        new_data[modified_column] = edited_transactions["edited_rows"][
-                            row_edited
-                        ][modified_column]
+        is_deleted = False
+        if edited_transactions["deleted_rows"]:
+            is_deleted = True
 
-                    else:
-                        new_data[modified_column] = edited_transactions["edited_rows"][
-                            row_edited
-                        ][modified_column]
+        if is_updated or is_deleted:
+            if is_updated:
+                # creating the update data obj
+                updated_transactions = []
+                for row_edited in edited_transactions["edited_rows"].keys():
+                    new_data = edited_data.iloc[int(row_edited)].to_dict()
+                    for modified_column in edited_transactions["edited_rows"][
+                        row_edited
+                    ]:
+                        if modified_column == "category":
+                            new_data["category_id"] = int(
+                                user_categories[
+                                    edited_transactions["edited_rows"][row_edited][
+                                        modified_column
+                                    ]
+                                ],
+                            )
 
-                updated_transactions.append(new_data)
+                            new_data[modified_column] = edited_transactions[
+                                "edited_rows"
+                            ][row_edited][modified_column]
+
+                        else:
+                            new_data[modified_column] = edited_transactions[
+                                "edited_rows"
+                            ][row_edited][modified_column]
+
+                    updated_transactions.append(new_data)
+
+            if is_deleted:
+                deleted_transactions = []
+                for row_deleted in edited_transactions["deleted_rows"]:
+                    deleted_transactions.append(
+                        int(data.iloc[int(row_deleted)]["transaction_id"])
+                    )
 
             if st.button("Updated transactions", type="primary"):
-                database.update_transactions(
-                    user_id=st.session_state["user_id"],
-                    transactions=updated_transactions,
-                )
+                if is_updated:
+                    database.update_transactions(
+                        user_id=st.session_state["user_id"],
+                        transactions=updated_transactions,
+                    )
+                if is_deleted:
+                    database.delete_transactions(
+                        user_id=st.session_state["user_id"],
+                        transaction_ids=deleted_transactions,
+                    )
                 st.success("Transactions successfully updated!")
                 sleep(2)
                 st.experimental_rerun()

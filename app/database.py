@@ -300,6 +300,19 @@ class Database:
         session.commit()
         session.close()
 
+    def delete_transaction(self, user_id: int, transaction_id: int):
+        session = self.Session()
+        session.query(Transaction).filter_by(transaction_id=transaction_id).delete()
+        session.commit()
+        session.close()
+
+    def delete_transactions(self, user_id: int, transaction_ids: list):
+        session = self.Session()
+        for transaction_id in transaction_ids:
+            session.query(Transaction).filter_by(transaction_id=transaction_id).delete()
+        session.commit()
+        session.close()
+
     def get_all_transactions_by_user_id(self, user_id: int):
         session = self.Session()
         # add category name
