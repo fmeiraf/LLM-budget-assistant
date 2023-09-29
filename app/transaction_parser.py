@@ -37,7 +37,9 @@ class TransactionParser:
         self.transaction_string = transaction_string
         self.parsed_transactions = None
         self.llm = None
+        self.token_validator = None
         self.transaction_categories = None
+        self.last_raw_response_from_guard_completion = None
         logging.basicConfig(
             filename="llm_cals.log",
             level=logging.INFO,
@@ -66,6 +68,8 @@ class TransactionParser:
             temperature=0.0,
         )
 
+        self.last_raw_response_from_guard_completion = raw_response
+
         self.logger.info(
             f"LLM Call completed with the following response paramters: \n {raw_response}"
         )
@@ -85,17 +89,20 @@ class TransactionParser:
             f"LLM Call completed with the following response paramters: \n {response['usage']}"
         )
 
+        self.last_response_chat_completion = response
+
         return response["choices"][0]["message"]["content"]
 
     def parse_transactions(self):
         guard = gd.Guard.from_rail_string(rail_str)
         openai.api_key = OPEN_API_KEY
 
-        token_validator = TokenValidator(
+        self.token_validator = TokenValidator(
             model=MODEL, base_prompt=guard.base_prompt, max_tokens_threshold=MAX_TOKENS
         )
 
-        split_input = token_validator.process(input=self.transaction_string)
+        split_input = self.token_validator.process(input=self.transaction_string)
+        print(len(split_input), split_input)
 
         parsed_transactions = []
         for input in split_input:
