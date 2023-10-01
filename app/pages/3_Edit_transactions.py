@@ -82,8 +82,6 @@ def main():
 
             edited_transactions = st.session_state["edited_transactions"]
 
-            st.write(edited_transactions)
-
             # If rows are updated or deleted
             is_updated = False
             if edited_transactions["edited_rows"]:
